@@ -1,21 +1,23 @@
 "use client";
 
-import { PaymentMethod, TransactionType } from "@prisma/client";
 import { useActionState, useMemo, useState } from "react";
 import { useFormStatus } from "react-dom";
+import {
+  PAYMENT_METHOD,
+  PAYMENT_METHOD_OPTIONS,
+  TRANSACTION_TYPE,
+  TRANSACTION_TYPE_OPTIONS,
+  type EditableTransaction,
+  type PaymentMethod,
+  type TransactionFormOptions,
+  type TransactionType,
+  paymentMethodLabels,
+} from "@/lib/finance/types";
 import type { TransactionActionState } from "@/server/transactions/actions";
 import {
   createTransactionAction,
   updateTransactionAction,
 } from "@/server/transactions/actions";
-import {
-  paymentMethodLabels,
-  transactionTypeLabels,
-} from "@/server/transactions/labels";
-import type {
-  EditableTransaction,
-  TransactionFormOptions,
-} from "@/server/transactions/types";
 
 type TransactionFormProps = {
   options: TransactionFormOptions;
@@ -26,15 +28,6 @@ const initialState: TransactionActionState = {
   status: "idle",
   message: "",
 };
-
-const paymentMethods = [
-  PaymentMethod.PIX,
-  PaymentMethod.DEBIT,
-  PaymentMethod.CREDIT,
-  PaymentMethod.CASH,
-  PaymentMethod.BANK_SLIP,
-  PaymentMethod.OTHER,
-];
 
 function SubmitButton({ isEditing }: { isEditing: boolean }) {
   const { pending } = useFormStatus();
@@ -66,10 +59,10 @@ export function TransactionForm({
   const action = isEditing ? updateTransactionAction : createTransactionAction;
   const [state, formAction] = useActionState(action, initialState);
   const [type, setType] = useState<TransactionType>(
-    initialTransaction?.type ?? TransactionType.EXPENSE,
+    initialTransaction?.type ?? TRANSACTION_TYPE.EXPENSE,
   );
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(
-    initialTransaction?.paymentMethod ?? PaymentMethod.PIX,
+    initialTransaction?.paymentMethod ?? PAYMENT_METHOD.PIX,
   );
   const [isInstallment, setIsInstallment] = useState(
     initialTransaction?.isInstallment ?? false,
@@ -79,7 +72,7 @@ export function TransactionForm({
     () => options.categories.filter((category) => category.type === type),
     [options.categories, type],
   );
-  const showCardField = paymentMethod === PaymentMethod.CREDIT;
+  const showCardField = paymentMethod === PAYMENT_METHOD.CREDIT;
   const showInstallmentFields = showCardField && isInstallment;
 
   return (
@@ -125,24 +118,24 @@ export function TransactionForm({
         </div>
 
         <div className="grid grid-cols-2 gap-2 rounded-lg bg-slate-100 p-1">
-          {[TransactionType.EXPENSE, TransactionType.INCOME].map((item) => (
+          {TRANSACTION_TYPE_OPTIONS.map((item) => (
             <label
               className={`flex min-h-10 items-center justify-center rounded-md text-sm font-semibold transition ${
-                type === item
+                type === item.value
                   ? "bg-white text-slate-950 shadow-sm"
                   : "text-slate-500"
               }`}
-              key={item}
+              key={item.value}
             >
               <input
                 type="radio"
                 name="type"
-                value={item}
-                checked={type === item}
-                onChange={() => setType(item)}
+                value={item.value}
+                checked={type === item.value}
+                onChange={() => setType(item.value)}
                 className="sr-only"
               />
-              {transactionTypeLabels[item]}
+              {item.label}
             </label>
           ))}
         </div>
@@ -185,15 +178,15 @@ export function TransactionForm({
               const nextPaymentMethod = event.target.value as PaymentMethod;
               setPaymentMethod(nextPaymentMethod);
 
-              if (nextPaymentMethod !== PaymentMethod.CREDIT) {
+              if (nextPaymentMethod !== PAYMENT_METHOD.CREDIT) {
                 setIsInstallment(false);
               }
             }}
             className="mt-2 min-h-12 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 text-sm text-slate-950 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100"
           >
-            {paymentMethods.map((method) => (
-              <option key={method} value={method}>
-                {paymentMethodLabels[method]}
+            {PAYMENT_METHOD_OPTIONS.map((method) => (
+              <option key={method.value} value={method.value}>
+                {paymentMethodLabels[method.value]}
               </option>
             ))}
           </select>

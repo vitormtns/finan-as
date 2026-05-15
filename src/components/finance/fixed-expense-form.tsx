@@ -1,18 +1,20 @@
 "use client";
 
-import { PaymentMethod } from "@prisma/client";
 import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
+import {
+  PAYMENT_METHOD,
+  PAYMENT_METHOD_OPTIONS,
+  type EditableFixedExpense,
+  type FixedExpenseFormOptions,
+  type PaymentMethod,
+  paymentMethodLabels,
+} from "@/lib/finance/types";
 import type { FixedExpenseActionState } from "@/server/fixed-expenses/actions";
 import {
   createFixedExpenseAction,
   updateFixedExpenseAction,
 } from "@/server/fixed-expenses/actions";
-import type {
-  EditableFixedExpense,
-  FixedExpenseFormOptions,
-} from "@/server/fixed-expenses/types";
-import { paymentMethodLabels } from "@/server/transactions/labels";
 
 type FixedExpenseFormProps = {
   options: FixedExpenseFormOptions;
@@ -23,15 +25,6 @@ const initialState: FixedExpenseActionState = {
   status: "idle",
   message: "",
 };
-
-const paymentMethods = [
-  PaymentMethod.PIX,
-  PaymentMethod.DEBIT,
-  PaymentMethod.CREDIT,
-  PaymentMethod.CASH,
-  PaymentMethod.BANK_SLIP,
-  PaymentMethod.OTHER,
-];
 
 function SubmitButton({ isEditing }: { isEditing: boolean }) {
   const { pending } = useFormStatus();
@@ -67,10 +60,10 @@ export function FixedExpenseForm({
   const action = isEditing ? updateFixedExpenseAction : createFixedExpenseAction;
   const [state, formAction] = useActionState(action, initialState);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(
-    initialExpense?.paymentMethod ?? PaymentMethod.PIX,
+    initialExpense?.paymentMethod ?? PAYMENT_METHOD.PIX,
   );
   const [active, setActive] = useState(initialExpense?.active ?? true);
-  const showCardField = paymentMethod === PaymentMethod.CREDIT;
+  const showCardField = paymentMethod === PAYMENT_METHOD.CREDIT;
 
   return (
     <form
@@ -178,9 +171,9 @@ export function FixedExpenseForm({
             }
             className="mt-2 min-h-12 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 text-sm text-slate-950 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100"
           >
-            {paymentMethods.map((method) => (
-              <option key={method} value={method}>
-                {paymentMethodLabels[method]}
+            {PAYMENT_METHOD_OPTIONS.map((method) => (
+              <option key={method.value} value={method.value}>
+                {paymentMethodLabels[method.value]}
               </option>
             ))}
           </select>

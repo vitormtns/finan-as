@@ -1,18 +1,20 @@
 "use client";
 
-import { TransactionType } from "@prisma/client";
 import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
+import {
+  CATEGORY_TYPE_OPTIONS,
+  TRANSACTION_TYPE,
+  type CategoryFormCategory,
+} from "@/lib/finance/types";
 import type { CategoryActionState } from "@/server/categories/actions";
 import {
   createCategoryAction,
   updateCategoryAction,
 } from "@/server/categories/actions";
-import type { EditableCategory } from "@/server/categories/types";
-import { transactionTypeLabels } from "@/server/transactions/labels";
 
 type CategoryFormProps = {
-  initialCategory?: EditableCategory | null;
+  initialCategory?: CategoryFormCategory | null;
 };
 
 const initialState: CategoryActionState = {
@@ -51,7 +53,7 @@ export function CategoryForm({ initialCategory }: CategoryFormProps) {
   const action = isEditing ? updateCategoryAction : createCategoryAction;
   const [state, formAction] = useActionState(action, initialState);
   const [type, setType] = useState(
-    initialCategory?.type ?? TransactionType.EXPENSE,
+    initialCategory?.type ?? TRANSACTION_TYPE.EXPENSE,
   );
 
   return (
@@ -79,24 +81,24 @@ export function CategoryForm({ initialCategory }: CategoryFormProps) {
         </div>
 
         <div className="grid grid-cols-2 gap-2 rounded-lg bg-slate-100 p-1">
-          {[TransactionType.EXPENSE, TransactionType.INCOME].map((item) => (
+          {CATEGORY_TYPE_OPTIONS.map((item) => (
             <label
               className={`flex min-h-10 items-center justify-center rounded-md text-sm font-semibold transition ${
-                type === item
+                type === item.value
                   ? "bg-white text-slate-950 shadow-sm"
                   : "text-slate-500"
               }`}
-              key={item}
+              key={item.value}
             >
               <input
                 type="radio"
                 name="type"
-                value={item}
-                checked={type === item}
-                onChange={() => setType(item)}
+                value={item.value}
+                checked={type === item.value}
+                onChange={() => setType(item.value)}
                 className="sr-only"
               />
-              {transactionTypeLabels[item]}
+              {item.label}
             </label>
           ))}
         </div>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Edit3, Layers3, Trash2 } from "lucide-react";
 import { CategoryForm } from "@/components/finance/category-form";
 import { MobileNavigation } from "@/components/finance/mobile-navigation";
+import { TRANSACTION_TYPE, transactionTypeLabels } from "@/lib/finance/types";
 import { requireCurrentUserId } from "@/server/auth/current-user";
 import { deleteCategoryAction } from "@/server/categories/actions";
 import {
@@ -12,8 +13,6 @@ import type {
   CategoriesPageData,
   EditableCategory,
 } from "@/server/categories/types";
-import { transactionTypeLabels } from "@/server/transactions/labels";
-import { TransactionType } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 
@@ -54,10 +53,10 @@ export default async function CategoriesPage({
   const { data, editableCategory, error } = await loadPageData(editar);
   const isEditing = Boolean(editar);
   const expenseCategories =
-    data?.categories.filter((category) => category.type === TransactionType.EXPENSE) ??
+    data?.categories.filter((category) => category.type === TRANSACTION_TYPE.EXPENSE) ??
     [];
   const incomeCategories =
-    data?.categories.filter((category) => category.type === TransactionType.INCOME) ??
+    data?.categories.filter((category) => category.type === TRANSACTION_TYPE.INCOME) ??
     [];
 
   return (
