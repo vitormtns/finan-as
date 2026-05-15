@@ -1,0 +1,201 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum TransactionType {
+  EXPENSE @map("expense")
+  INCOME  @map("income")
+
+  @@map("transaction_type")
+}
+
+enum PaymentMethod {
+  PIX       @map("pix")
+  DEBIT     @map("debit")
+  CREDIT    @map("credit")
+  CASH      @map("cash")
+  BANK_SLIP @map("bank_slip")
+  OTHER     @map("other")
+
+  @@map("payment_method")
+}
+
+enum AlertSeverity {
+  INFO    @map("info")
+  WARNING @map("warning")
+  DANGER  @map("danger")
+  SUCCESS @map("success")
+
+  @@map("alert_severity")
+}
+
+model Profile {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @unique
+  name      String?
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @db.Timestamptz(6)
+
+  alerts          Alert[]
+  budgets         Budget[]
+  cards           Card[]
+  categories      Category[]
+  categoryBudgets CategoryBudget[]
+  fixedExpenses   FixedExpense[]
+  transactions    Transaction[]
+
+  @@index([userId])
+  @@map("profiles")
+}
+
+model Category {
+  id        String          @id @default(uuid()) @db.Uuid
+  userId    String
+  name      String
+  icon      String?
+  color     String?
+  type      TransactionType
+  createdAt DateTime        @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime        @updatedAt @db.Timestamptz(6)
+
+  profile         Profile          @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  categoryBudgets CategoryBudget[]
+  fixedExpenses   FixedExpense[]
+  transactions    Transaction[]
+
+  @@unique([userId, name, type])
+  @@index([userId, type])
+  @@map("categories")
+}
+
+model Transaction {
+  id                 String          @id @default(uuid()) @db.Uuid
+  userId             String
+  categoryId         String?         @db.Uuid
+  cardId             String?         @db.Uuid
+  amount             Decimal         @db.Decimal(12, 2)
+  description        String?
+  type               TransactionType
+  paymentMethod      PaymentMethod
+  date               DateTime        @db.Date
+  isInstallment      Boolean         @default(false)
+  installmentGroupId String?         @db.Uuid
+  installmentNumber  Int?
+  totalInstallments  Int?
+  createdAt          DateTime        @default(now()) @db.Timestamptz(6)
+  updatedAt          DateTime        @updatedAt @db.Timestamptz(6)
+
+  profile  Profile   @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  card     Card?     @relation(fields: [cardId], references: [id], onDelete: SetNull)
+
+  @@index([userId, date])
+  @@index([userId, type, date])
+  @@index([categoryId, date])
+  @@index([cardId, date])
+  @@index([installmentGroupId])
+  @@map("transactions")
+}
+
+model Card {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String
+  name        String
+  color       String?
+  limitAmount Decimal? @db.Decimal(12, 2)
+  closingDay  Int?
+  dueDay      Int?
+  createdAt   DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @db.Timestamptz(6)
+
+  profile       Profile        @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  fixedExpenses FixedExpense[]
+  transactions  Transaction[]
+
+  @@unique([userId, name])
+  @@index([userId])
+  @@map("cards")
+}
+
+model Budget {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String
+  month      Int
+  year       Int
+  totalLimit Decimal  @db.Decimal(12, 2)
+  createdAt  DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @db.Timestamptz(6)
+
+  profile Profile @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@unique([userId, month, year])
+  @@index([userId, year, month])
+  @@map("budgets")
+}
+
+model CategoryBudget {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String
+  categoryId  String   @db.Uuid
+  month       Int
+  year        Int
+  limitAmount Decimal  @db.Decimal(12, 2)
+  createdAt   DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @db.Timestamptz(6)
+
+  profile  Profile  @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, categoryId, month, year])
+  @@index([userId, year, month])
+  @@index([categoryId, year, month])
+  @@map("category_budgets")
+}
+
+model FixedExpense {
+  id            String        @id @default(uuid()) @db.Uuid
+  userId        String
+  categoryId    String?       @db.Uuid
+  description   String
+  amount        Decimal       @db.Decimal(12, 2)
+  dueDay        Int
+  paymentMethod PaymentMethod
+  cardId        String?       @db.Uuid
+  active        Boolean       @default(true)
+  createdAt     DateTime      @default(now()) @db.Timestamptz(6)
+  updatedAt     DateTime      @updatedAt @db.Timestamptz(6)
+
+  profile  Profile   @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  card     Card?     @relation(fields: [cardId], references: [id], onDelete: SetNull)
+
+  @@index([userId, active])
+  @@index([userId, dueDay])
+  @@index([categoryId])
+  @@index([cardId])
+  @@map("fixed_expenses")
+}
+
+model Alert {
+  id        String        @id @default(uuid()) @db.Uuid
+  userId    String
+  type      String
+  title     String
+  message   String
+  severity  AlertSeverity
+  month     Int?
+  year      Int?
+  readAt    DateTime?     @db.Timestamptz(6)
+  createdAt DateTime      @default(now()) @db.Timestamptz(6)
+
+  profile Profile @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([userId, year, month])
+  @@index([userId, readAt])
+  @@map("alerts")
+}
