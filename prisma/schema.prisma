@@ -33,6 +33,12 @@ enum AlertSeverity {
   @@map("alert_severity")
 }
 
+enum FixedExpensePaymentStatus {
+  PAID @map("paid")
+
+  @@map("fixed_expense_payment_status")
+}
+
 model Profile {
   id        String   @id @default(uuid()) @db.Uuid
   userId    String   @unique
@@ -40,13 +46,14 @@ model Profile {
   createdAt DateTime @default(now()) @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @db.Timestamptz(6)
 
-  alerts          Alert[]
-  budgets         Budget[]
-  cards           Card[]
-  categories      Category[]
-  categoryBudgets CategoryBudget[]
-  fixedExpenses   FixedExpense[]
-  transactions    Transaction[]
+  alerts               Alert[]
+  budgets              Budget[]
+  cards                Card[]
+  categories           Category[]
+  categoryBudgets      CategoryBudget[]
+  fixedExpenses        FixedExpense[]
+  fixedExpensePayments FixedExpensePayment[]
+  transactions         Transaction[]
 
   @@index([userId])
   @@map("profiles")
@@ -89,9 +96,10 @@ model Transaction {
   createdAt          DateTime        @default(now()) @db.Timestamptz(6)
   updatedAt          DateTime        @updatedAt @db.Timestamptz(6)
 
-  profile  Profile   @relation(fields: [userId], references: [userId], onDelete: Cascade)
-  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  card     Card?     @relation(fields: [cardId], references: [id], onDelete: SetNull)
+  profile              Profile               @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  category             Category?             @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  card                 Card?                 @relation(fields: [cardId], references: [id], onDelete: SetNull)
+  fixedExpensePayments FixedExpensePayment[]
 
   @@index([userId, date])
   @@index([userId, type, date])
@@ -169,15 +177,38 @@ model FixedExpense {
   createdAt     DateTime      @default(now()) @db.Timestamptz(6)
   updatedAt     DateTime      @updatedAt @db.Timestamptz(6)
 
-  profile  Profile   @relation(fields: [userId], references: [userId], onDelete: Cascade)
-  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  card     Card?     @relation(fields: [cardId], references: [id], onDelete: SetNull)
+  profile  Profile               @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  category Category?             @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  card     Card?                 @relation(fields: [cardId], references: [id], onDelete: SetNull)
+  payments FixedExpensePayment[]
 
   @@index([userId, active])
   @@index([userId, dueDay])
   @@index([categoryId])
   @@index([cardId])
   @@map("fixed_expenses")
+}
+
+model FixedExpensePayment {
+  id             String                    @id @default(uuid()) @db.Uuid
+  userId         String
+  fixedExpenseId String                    @db.Uuid
+  transactionId  String?                   @unique @db.Uuid
+  month          Int
+  year           Int
+  paidAt         DateTime                  @db.Date
+  status         FixedExpensePaymentStatus @default(PAID)
+  createdAt      DateTime                  @default(now()) @db.Timestamptz(6)
+  updatedAt      DateTime                  @updatedAt @db.Timestamptz(6)
+
+  profile      Profile      @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  fixedExpense FixedExpense @relation(fields: [fixedExpenseId], references: [id], onDelete: Cascade)
+  transaction  Transaction? @relation(fields: [transactionId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, fixedExpenseId, month, year])
+  @@index([userId, year, month])
+  @@index([fixedExpenseId, year, month])
+  @@map("fixed_expense_payments")
 }
 
 model Alert {

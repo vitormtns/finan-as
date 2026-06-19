@@ -2,11 +2,13 @@ import Link from "next/link";
 import {
   CalendarClock,
   BarChart3,
+  CheckCircle2,
   CreditCard,
   Edit3,
   Layers3,
   Pause,
   Play,
+  ReceiptText,
   Trash2,
 } from "lucide-react";
 import { FixedExpenseForm } from "@/components/finance/fixed-expense-form";
@@ -16,6 +18,7 @@ import { formatCurrency } from "@/lib/formatters";
 import { requireCurrentUserId } from "@/server/auth/current-user";
 import {
   deleteFixedExpenseAction,
+  launchFixedExpensePaymentAction,
   toggleFixedExpenseAction,
 } from "@/server/fixed-expenses/actions";
 import {
@@ -60,21 +63,29 @@ async function loadPageData(id?: string): Promise<{
   }
 }
 
-function statusLabel(status: "upcoming" | "overdue" | "inactive") {
+function statusLabel(status: "pending" | "paid" | "overdue" | "inactive") {
   if (status === "inactive") {
     return "Inativo";
+  }
+
+  if (status === "paid") {
+    return "Pago";
   }
 
   if (status === "overdue") {
     return "Vencido";
   }
 
-  return "Próximo";
+  return "Pendente";
 }
 
-function statusClasses(status: "upcoming" | "overdue" | "inactive") {
+function statusClasses(status: "pending" | "paid" | "overdue" | "inactive") {
   if (status === "inactive") {
     return "bg-slate-100 text-slate-500";
+  }
+
+  if (status === "paid") {
+    return "bg-emerald-50 text-emerald-700";
   }
 
   if (status === "overdue") {
@@ -209,7 +220,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
               </div>
             </section>
 
-            <section className="grid gap-3 sm:grid-cols-3">
+            <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/70">
                 <p className="text-sm font-medium text-slate-500">
                   Total ativo mensal
@@ -224,10 +235,10 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                   Próximos vencimentos
                 </p>
                 <strong className="mt-2 block text-2xl font-semibold text-slate-950">
-                  {formatCurrency(data.summary.upcomingTotal)}
+                  {formatCurrency(data.summary.pendingTotal)}
                 </strong>
                 <p className="mt-2 text-sm text-slate-500">
-                  {data.summary.upcomingCount} item(ns) neste mês
+                  {data.summary.pendingCount} item(ns) pendente(s)
                 </p>
               </article>
 
@@ -240,6 +251,18 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                 </strong>
                 <p className="mt-2 text-sm text-slate-500">
                   {data.summary.overdueCount} item(ns) já passaram
+                </p>
+              </article>
+
+              <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/70">
+                <p className="text-sm font-medium text-slate-500">
+                  Pagos no mês
+                </p>
+                <strong className="mt-2 block text-2xl font-semibold text-slate-950">
+                  {formatCurrency(data.summary.paidTotal)}
+                </strong>
+                <p className="mt-2 text-sm text-slate-500">
+                  {data.summary.paidCount} item(ns) confirmado(s)
                 </p>
               </article>
             </section>
@@ -316,6 +339,24 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                         <p className="mt-1 text-xs text-slate-500">
                           Vence dia {expense.dueDay}
                         </p>
+                        {expense.paidAt ? (
+                          <p className="mt-1 text-xs text-emerald-700">
+                            Pago em{" "}
+                            {new Intl.DateTimeFormat("pt-BR").format(
+                              new Date(`${expense.paidAt}T00:00:00`),
+                            )}
+                            {expense.paymentTransactionId
+                              ? " • transação lançada"
+                              : ""}
+                          </p>
+                        ) : expense.latestPaidAt ? (
+                          <p className="mt-1 text-xs text-slate-500">
+                            Último pagamento em{" "}
+                            {new Intl.DateTimeFormat("pt-BR").format(
+                              new Date(`${expense.latestPaidAt}T00:00:00`),
+                            )}
+                          </p>
+                        ) : null}
                       </div>
 
                       <div className="shrink-0 text-right">
@@ -330,7 +371,25 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                       </div>
                     </div>
 
-                    <div className="mt-4 flex justify-end gap-1">
+                    <div className="mt-4 flex flex-wrap justify-end gap-2">
+                      {expense.active && expense.status !== "paid" ? (
+                        <form action={launchFixedExpensePaymentAction}>
+                          <input type="hidden" name="id" value={expense.id} />
+                          <button
+                            type="submit"
+                            className="inline-flex min-h-9 items-center justify-center gap-2 rounded-lg border border-emerald-100 bg-emerald-50 px-3 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-100"
+                          >
+                            <ReceiptText size={15} aria-hidden="true" />
+                            Lançar pagamento
+                          </button>
+                        </form>
+                      ) : expense.status === "paid" ? (
+                        <span className="inline-flex min-h-9 items-center justify-center gap-2 rounded-lg border border-emerald-100 bg-emerald-50 px-3 text-xs font-semibold text-emerald-700">
+                          <CheckCircle2 size={15} aria-hidden="true" />
+                          Pago no mês
+                        </span>
+                      ) : null}
+
                       <Link
                         href={`/ajustes?editar=${expense.id}`}
                         className="flex size-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-slate-50 hover:text-slate-950"

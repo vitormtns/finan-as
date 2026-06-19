@@ -4,11 +4,15 @@ import { revalidatePath } from "next/cache";
 import { requireCurrentUserId } from "@/server/auth/current-user";
 import {
   editFixedExpense,
+  launchFixedExpensePayment,
   removeFixedExpense,
   saveFixedExpense,
   setFixedExpenseActive,
 } from "./service";
-import { fixedExpenseFormSchema } from "./validation";
+import {
+  fixedExpenseFormSchema,
+  fixedExpensePaymentSchema,
+} from "./validation";
 
 export type FixedExpenseActionState = {
   status: "idle" | "success" | "error";
@@ -23,7 +27,9 @@ function formDataToObject(formData: FormData) {
 function revalidateFixedExpenseViews() {
   revalidatePath("/");
   revalidatePath("/ajustes");
+  revalidatePath("/gastos");
   revalidatePath("/cartoes");
+  revalidatePath("/relatorios");
   revalidatePath("/alertas");
 }
 
@@ -126,4 +132,21 @@ export async function toggleFixedExpenseAction(formData: FormData) {
   const userId = await requireCurrentUserId();
   await setFixedExpenseActive(userId, id, active);
   revalidateFixedExpenseViews();
+}
+
+export async function launchFixedExpensePaymentAction(formData: FormData) {
+  const parsed = fixedExpensePaymentSchema.safeParse(formDataToObject(formData));
+
+  if (!parsed.success) {
+    return;
+  }
+
+  const userId = await requireCurrentUserId();
+  try {
+    await launchFixedExpensePayment(userId, parsed.data.id);
+  } catch {
+    // A tela será revalidada; se já estava pago, o status aparece atualizado.
+  } finally {
+    revalidateFixedExpenseViews();
+  }
 }

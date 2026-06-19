@@ -4,11 +4,21 @@ import {
   createCard,
   deleteCard,
   findCardForEdit,
-  listCardsWithCurrentMonthData,
+  findCardWithInvoiceData,
+  listCardsWithInvoiceData,
   updateCard,
 } from "./repository";
+import {
+  getInvoiceCycleForReferenceDate,
+  getNextInvoiceCycle,
+  groupFutureInstallmentsByMonth,
+  sumInvoice,
+  toDateKey,
+  type CardInvoiceInputTransaction,
+  type CardInvoiceSummary,
+} from "./invoice";
 import type {
-  CardInvoiceTransaction,
+  CardInvoiceView,
   CardListItem,
   CardsPageData,
   EditableCard,
@@ -31,45 +41,71 @@ function roundMoney(value: number) {
   return Math.round(value * 100) / 100;
 }
 
-function getCurrentMonthReference(date = new Date()) {
-  const month = date.getMonth() + 1;
-  const year = date.getFullYear();
-
-  return { month, year };
+function getInvoiceFetchStartDate(date = new Date()) {
+  return new Date(date.getFullYear(), date.getMonth() - 1, 1);
 }
 
 function toInvoiceTransaction(
-  transaction: Awaited<ReturnType<typeof listCardsWithCurrentMonthData>>[number]["transactions"][number],
-): CardInvoiceTransaction {
+  transaction: {
+    id: string;
+    amount: { toString: () => string };
+    description: string | null;
+    date: Date;
+    installmentNumber: number | null;
+    totalInstallments: number | null;
+    category: { name: string } | null;
+  },
+): CardInvoiceInputTransaction {
   return {
     id: transaction.id,
     amount: decimalToNumber(transaction.amount),
     description: transaction.description ?? "Compra sem descrição",
-    date: transaction.date.toISOString().slice(0, 10),
+    date: transaction.date,
     categoryName: transaction.category?.name ?? "Sem categoria",
-    installmentLabel:
-      transaction.installmentNumber && transaction.totalInstallments
-        ? `${transaction.installmentNumber}/${transaction.totalInstallments}`
-        : null,
+    installmentNumber: transaction.installmentNumber,
+    totalInstallments: transaction.totalInstallments,
+  };
+}
+
+function toInvoiceView(invoice: CardInvoiceSummary): CardInvoiceView {
+  return {
+    total: invoice.total,
+    periodStart: toDateKey(invoice.periodStart),
+    periodEnd: toDateKey(invoice.periodEnd),
+    closingDate: toDateKey(invoice.closingDate),
+    dueDate: toDateKey(invoice.dueDate),
+    purchaseCount: invoice.purchaseCount,
+    installmentCount: invoice.installmentCount,
+    purchases: invoice.purchases,
   };
 }
 
 function toCardListItem(
-  card: Awaited<ReturnType<typeof listCardsWithCurrentMonthData>>[number],
+  card: Awaited<ReturnType<typeof listCardsWithInvoiceData>>[number],
+  date = new Date(),
 ): CardListItem {
-  const currentMonthTotal = roundMoney(
-    card.transactions.reduce(
-      (sum, transaction) => sum + decimalToNumber(transaction.amount),
-      0,
-    ),
-  );
+  const closingDay = card.closingDay ?? 1;
+  const dueDay = card.dueDay ?? 10;
+  const transactions = card.transactions.map(toInvoiceTransaction);
+  const currentCycle = getInvoiceCycleForReferenceDate({
+    referenceDate: date,
+    closingDay,
+    dueDay,
+  });
+  const nextCycle = getNextInvoiceCycle({
+    cycle: currentCycle,
+    closingDay,
+    dueDay,
+  });
+  const currentInvoice = sumInvoice(transactions, currentCycle);
+  const nextInvoice = sumInvoice(transactions, nextCycle);
   const limitAmount = card.limitAmount ? decimalToNumber(card.limitAmount) : null;
   const availableLimit =
-    limitAmount === null ? null : roundMoney(limitAmount - currentMonthTotal);
+    limitAmount === null ? null : roundMoney(limitAmount - currentInvoice.total);
   const usedPercentage =
     limitAmount === null || limitAmount === 0
       ? null
-      : Math.min(Math.round((currentMonthTotal / limitAmount) * 100), 999);
+      : Math.min(Math.round((currentInvoice.total / limitAmount) * 100), 999);
 
   return {
     id: card.id,
@@ -78,11 +114,18 @@ function toCardListItem(
     limitAmount,
     closingDay: card.closingDay,
     dueDay: card.dueDay,
-    currentMonthTotal,
+    currentInvoiceTotal: currentInvoice.total,
+    nextInvoiceTotal: nextInvoice.total,
     usedPercentage,
     availableLimit,
+    limitAlert: usedPercentage !== null && usedPercentage >= 80,
     linkedItemsCount: card._count.transactions + card._count.fixedExpenses,
-    invoiceTransactions: card.transactions.map(toInvoiceTransaction),
+    currentInvoice: toInvoiceView(currentInvoice),
+    nextInvoice: toInvoiceView(nextInvoice),
+    futureInstallments: groupFutureInstallmentsByMonth({
+      transactions,
+      afterCycle: currentCycle,
+    }),
   };
 }
 
@@ -91,14 +134,31 @@ export async function getCardsPageData(
   selectedCardId?: string,
   date = new Date(),
 ): Promise<CardsPageData> {
-  const { month, year } = getCurrentMonthReference(date);
-  const cards = (await listCardsWithCurrentMonthData(userId, month, year)).map(
-    toCardListItem,
-  );
+  const cards = (
+    await listCardsWithInvoiceData(userId, getInvoiceFetchStartDate(date))
+  ).map((card) => toCardListItem(card, date));
   const selectedCard =
     cards.find((card) => card.id === selectedCardId) ?? cards[0] ?? null;
 
   return { cards, selectedCard };
+}
+
+export async function getCardInvoiceDetail(
+  userId: string,
+  id: string,
+  date = new Date(),
+): Promise<CardListItem | null> {
+  const card = await findCardWithInvoiceData(
+    userId,
+    id,
+    getInvoiceFetchStartDate(date),
+  );
+
+  if (!card) {
+    return null;
+  }
+
+  return toCardListItem(card, date);
 }
 
 export async function getEditableCard(

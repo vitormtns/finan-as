@@ -55,7 +55,7 @@ export function TransactionForm({
   options,
   initialTransaction,
 }: TransactionFormProps) {
-  const isEditing = Boolean(initialTransaction);
+  const isEditing = Boolean(initialTransaction?.id);
   const action = isEditing ? updateTransactionAction : createTransactionAction;
   const [state, formAction] = useActionState(action, initialState);
   const [type, setType] = useState<TransactionType>(
@@ -80,7 +80,7 @@ export function TransactionForm({
       action={formAction}
       className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/70 sm:p-5"
     >
-      {initialTransaction ? (
+      {initialTransaction?.id ? (
         <input type="hidden" name="id" value={initialTransaction.id} />
       ) : null}
 

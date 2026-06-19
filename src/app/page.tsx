@@ -2,7 +2,6 @@ import Link from "next/link";
 import {
   ArrowRight,
   CalendarDays,
-  Gauge,
   PiggyBank,
   TrendingDown,
   TrendingUp,
@@ -12,10 +11,12 @@ import { AddExpenseButton } from "@/components/finance/add-expense-button";
 import { AlertCard } from "@/components/finance/alert-card";
 import { AlertsList } from "@/components/finance/alerts-list";
 import { CategoryList } from "@/components/finance/category-list";
+import { DailySpendingCard } from "@/components/finance/daily-spending-card";
 import { FinancialSummaryCard } from "@/components/finance/financial-summary-card";
 import { FixedExpensesCard } from "@/components/finance/fixed-expenses-card";
 import { MobileNavigation } from "@/components/finance/mobile-navigation";
 import { MonthProjectionCard } from "@/components/finance/month-projection-card";
+import { WeeklySummaryCard } from "@/components/finance/weekly-summary-card";
 import { formatCurrency, formatMonth } from "@/lib/formatters";
 import { requireCurrentUserId } from "@/server/auth/current-user";
 import { generateFinancialAlertsFromDashboard } from "@/server/alerts/service";
@@ -146,7 +147,7 @@ export default async function Home() {
                   dashboard.availableAmount !== null &&
                   dashboard.availableAmount < 0
                     ? "Acima da meta"
-                    : "Ainda disponível"
+                    : "Saldo da meta"
                 }
                 value={
                   dashboard.availableAmount === null
@@ -157,7 +158,7 @@ export default async function Home() {
                   dashboard.availableAmount !== null &&
                   dashboard.availableAmount < 0
                     ? "Valor que já passou do orçamento mensal."
-                    : "Valor estimado para usar até o fim do mês."
+                    : "Antes de reservar os gastos fixos futuros."
                 }
                 icon={TrendingDown}
                 tone={
@@ -169,18 +170,18 @@ export default async function Home() {
               />
             </section>
 
-            <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              <FinancialSummaryCard
-                title="Limite seguro por dia"
-                value={
-                  dashboard.safeDailyLimit === null
-                    ? "Sem meta"
-                    : formatCurrency(dashboard.safeDailyLimit)
+            <section className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
+              <DailySpendingCard
+                allowance={dashboard.dailySpendingAllowance}
+                remainingFixedExpensesTotal={
+                  dashboard.remainingFixedExpensesTotal
                 }
-                description={`${dashboard.remainingDays} dia(s) restante(s) no mês.`}
-                icon={Gauge}
-                tone="warning"
+                remainingDays={dashboard.remainingDays}
               />
+              <WeeklySummaryCard summary={dashboard.weeklySummary} />
+            </section>
+
+            <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               <FinancialSummaryCard
                 title="Maior categoria"
                 value={dashboard.largestCategory?.name ?? "Sem gastos"}

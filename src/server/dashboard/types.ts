@@ -12,6 +12,7 @@ export type RemainingFixedExpense = {
   amount: number;
   dueDay: number;
   categoryName: string;
+  status: "pending" | "overdue";
 };
 
 export type DashboardOrientation = {
@@ -19,6 +20,24 @@ export type DashboardOrientation = {
   title: string;
   description: string;
   tone: "info" | "success" | "warning" | "danger";
+};
+
+export type DailySpendingAllowance = {
+  availableRealAmount: number | null;
+  safeDailyAmount: number | null;
+  message: string;
+  tone: "success" | "warning" | "danger" | "info";
+};
+
+export type WeeklySummary = {
+  totalExpenses: number;
+  dailyAverage: number;
+  topCategoryName: string | null;
+  topCategoryAmount: number;
+  previousWeekExpenses: number;
+  comparisonAmount: number | null;
+  comparisonPercentage: number | null;
+  comparisonTrend: "up" | "down" | "same" | "none";
 };
 
 export type MonthlyDashboard = {
@@ -32,10 +51,13 @@ export type MonthlyDashboard = {
   budgetLimit: number | null;
   availableAmount: number | null;
   safeDailyLimit: number | null;
+  dailySpendingAllowance: DailySpendingAllowance;
   categoryExpenses: DashboardCategory[];
   largestCategory: DashboardCategory | null;
   remainingFixedExpenses: RemainingFixedExpense[];
   remainingFixedExpensesTotal: number;
+  overdueFixedExpensesTotal: number;
+  weeklySummary: WeeklySummary;
   dailyAverage: number;
   projectedMonthTotal: number;
   projectedBudgetDifference: number | null;

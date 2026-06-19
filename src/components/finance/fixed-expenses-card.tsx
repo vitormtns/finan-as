@@ -14,13 +14,13 @@ export function FixedExpensesCard({ expenses, total }: FixedExpensesCardProps) {
           Fixos restantes
         </h2>
         <p className="mt-1 text-sm text-slate-500">
-          Estimativa do que ainda deve cair neste mês
+          Gastos fixos do mês que ainda não foram pagos
         </p>
       </div>
 
       {expenses.length === 0 ? (
         <div className="mt-5 rounded-lg border border-dashed border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-500">
-          Nenhum gasto fixo restante para este mês.
+          Nenhum gasto fixo pendente para este mês.
         </div>
       ) : (
         <div className="mt-5 divide-y divide-slate-100">
@@ -34,7 +34,9 @@ export function FixedExpensesCard({ expenses, total }: FixedExpensesCardProps) {
                   {expense.description}
                 </p>
                 <p className="mt-1 text-xs text-slate-500">
-                  {expense.categoryName} • vence dia {expense.dueDay}
+                  {expense.categoryName} •{" "}
+                  {expense.status === "overdue" ? "vencido" : "vence"} dia{" "}
+                  {expense.dueDay}
                 </p>
               </div>
               <strong className="shrink-0 text-sm font-semibold text-slate-950">

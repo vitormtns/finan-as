@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { CreditCard, Edit3, Trash2 } from "lucide-react";
+import { AlertTriangle, CreditCard, Edit3, Trash2 } from "lucide-react";
 import { CardForm } from "@/components/finance/card-form";
 import { MobileNavigation } from "@/components/finance/mobile-navigation";
-import { formatCurrency, formatMonth } from "@/lib/formatters";
+import { formatCurrency, formatDate } from "@/lib/formatters";
 import { requireCurrentUserId } from "@/server/auth/current-user";
 import { deleteCardAction } from "@/server/cards/actions";
 import { getCardsPageData, getEditableCard } from "@/server/cards/service";
@@ -48,7 +48,6 @@ export default async function CardsPage({ searchParams }: CardsPageProps) {
   const { editar, cartao } = await searchParams;
   const { data, editableCard, error } = await loadPageData(cartao, editar);
   const isEditing = Boolean(editar);
-  const currentMonth = formatMonth(new Date());
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,#dbeafe_0,#f8fafc_34rem)] pb-28 md:pb-0">
@@ -99,7 +98,7 @@ export default async function CardsPage({ searchParams }: CardsPageProps) {
                   Cartões cadastrados
                 </h2>
                 <p className="mt-1 text-sm text-slate-500">
-                  Uso calculado com compras no crédito em {currentMonth}.
+                  Faturas calculadas pelo fechamento de cada cartão.
                 </p>
               </div>
 
@@ -125,7 +124,7 @@ export default async function CardsPage({ searchParams }: CardsPageProps) {
                     className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm shadow-slate-200/70"
                   >
                     <Link
-                      href={`/cartoes?cartao=${card.id}`}
+                      href={`/cartoes/${card.id}`}
                       className="block p-4 text-white"
                       style={{
                         background: `linear-gradient(135deg, ${cardColor}, #0f172a)`,
@@ -143,17 +142,19 @@ export default async function CardsPage({ searchParams }: CardsPageProps) {
 
                       <div className="mt-6 grid grid-cols-2 gap-3">
                         <div>
-                          <p className="text-xs text-white/70">Usado no mês</p>
+                          <p className="text-xs text-white/70">
+                            Fatura atual
+                          </p>
                           <strong className="mt-1 block text-lg font-semibold">
-                            {formatCurrency(card.currentMonthTotal)}
+                            {formatCurrency(card.currentInvoiceTotal)}
                           </strong>
                         </div>
                         <div>
-                          <p className="text-xs text-white/70">Disponível</p>
+                          <p className="text-xs text-white/70">
+                            Próxima fatura
+                          </p>
                           <strong className="mt-1 block text-lg font-semibold">
-                            {card.availableLimit === null
-                              ? "Sem limite"
-                              : formatCurrency(card.availableLimit)}
+                            {formatCurrency(card.nextInvoiceTotal)}
                           </strong>
                         </div>
                       </div>
@@ -168,10 +169,24 @@ export default async function CardsPage({ searchParams }: CardsPageProps) {
                           </div>
                           <div className="mt-2 h-2 rounded-full bg-slate-100">
                             <div
-                              className="h-2 rounded-full bg-blue-600"
+                              className={`h-2 rounded-full ${
+                                card.limitAlert ? "bg-amber-500" : "bg-blue-600"
+                              }`}
                               style={{ width: `${Math.min(progress, 100)}%` }}
                             />
                           </div>
+                          {card.limitAlert ? (
+                            <div className="mt-3 flex items-start gap-2 rounded-lg border border-amber-100 bg-amber-50 p-3 text-xs leading-5 text-amber-800">
+                              <AlertTriangle
+                                className="mt-0.5 shrink-0"
+                                size={15}
+                                aria-hidden="true"
+                              />
+                              <span>
+                                Mais de 80% do limite usado nesta fatura.
+                              </span>
+                            </div>
+                          ) : null}
                         </div>
                       ) : (
                         <p className="text-sm text-slate-500">
@@ -179,12 +194,49 @@ export default async function CardsPage({ searchParams }: CardsPageProps) {
                         </p>
                       )}
 
-                      <div className="mt-4 flex items-center justify-between gap-3 text-sm text-slate-600">
-                        <span>Fecha dia {card.closingDay ?? "-"}</span>
-                        <span>Vence dia {card.dueDay ?? "-"}</span>
+                      <div className="mt-4 grid gap-2 rounded-lg bg-slate-50 p-3 text-sm text-slate-600 sm:grid-cols-2">
+                        <span>
+                          Fecha em {formatDate(card.currentInvoice.closingDate)}
+                        </span>
+                        <span>
+                          Vence em {formatDate(card.currentInvoice.dueDate)}
+                        </span>
+                        <span>
+                          Período: {formatDate(card.currentInvoice.periodStart)}
+                        </span>
+                        <span>
+                          até {formatDate(card.currentInvoice.periodEnd)}
+                        </span>
+                      </div>
+
+                      <div className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
+                        <div className="rounded-lg bg-slate-50 p-3">
+                          <p className="text-xs font-medium text-slate-500">
+                            Disponível
+                          </p>
+                          <strong className="mt-1 block font-semibold text-slate-950">
+                            {card.availableLimit === null
+                              ? "Sem limite"
+                              : formatCurrency(card.availableLimit)}
+                          </strong>
+                        </div>
+                        <div className="rounded-lg bg-slate-50 p-3">
+                          <p className="text-xs font-medium text-slate-500">
+                            Compras na fatura
+                          </p>
+                          <strong className="mt-1 block font-semibold text-slate-950">
+                            {card.currentInvoice.purchaseCount}
+                          </strong>
+                        </div>
                       </div>
 
                       <div className="mt-4 flex justify-end gap-1">
+                        <Link
+                          href={`/cartoes/${card.id}`}
+                          className="flex min-h-9 items-center rounded-lg border border-slate-200 px-3 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-slate-950"
+                        >
+                          Ver fatura
+                        </Link>
                         <Link
                           href={`/cartoes?editar=${card.id}&cartao=${card.id}`}
                           className="flex size-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-slate-50 hover:text-slate-950"
@@ -216,58 +268,6 @@ export default async function CardsPage({ searchParams }: CardsPageProps) {
               })}
             </section>
           </div>
-        ) : null}
-
-        {data?.selectedCard ? (
-          <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/70">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <h2 className="text-base font-semibold text-slate-950">
-                  Fatura estimada
-                </h2>
-                <p className="mt-1 text-sm text-slate-500">
-                  Compras no crédito em {currentMonth} para{" "}
-                  {data.selectedCard.name}.
-                </p>
-              </div>
-              <strong className="text-2xl font-semibold text-slate-950">
-                {formatCurrency(data.selectedCard.currentMonthTotal)}
-              </strong>
-            </div>
-
-            {data.selectedCard.invoiceTransactions.length === 0 ? (
-              <div className="mt-5 rounded-lg border border-dashed border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-500">
-                Nenhuma compra no crédito neste mês para este cartão.
-              </div>
-            ) : (
-              <div className="mt-5 divide-y divide-slate-100">
-                {data.selectedCard.invoiceTransactions.map((transaction) => (
-                  <div
-                    className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0"
-                    key={transaction.id}
-                  >
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-slate-800">
-                        {transaction.description}
-                      </p>
-                      <p className="mt-1 text-xs text-slate-500">
-                        {transaction.categoryName} •{" "}
-                        {new Intl.DateTimeFormat("pt-BR").format(
-                          new Date(`${transaction.date}T00:00:00`),
-                        )}
-                        {transaction.installmentLabel
-                          ? ` • ${transaction.installmentLabel}`
-                          : ""}
-                      </p>
-                    </div>
-                    <strong className="shrink-0 text-sm font-semibold text-slate-950">
-                      {formatCurrency(transaction.amount)}
-                    </strong>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
         ) : null}
       </main>
       <MobileNavigation />

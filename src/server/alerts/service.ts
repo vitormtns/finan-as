@@ -28,6 +28,7 @@ export async function generateFinancialAlertsFromDashboard(
     projectedMonthTotal: dashboard.projectedMonthTotal,
     projectedBudgetDifference: dashboard.projectedBudgetDifference,
     remainingFixedExpensesTotal: dashboard.remainingFixedExpensesTotal,
+    overdueFixedExpensesTotal: dashboard.overdueFixedExpensesTotal,
     weeklyExpenses,
     categoryBudgetUsages,
     cardLimitUsages,

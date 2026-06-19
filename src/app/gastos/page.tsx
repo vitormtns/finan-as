@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Edit3, Plus, Trash2 } from "lucide-react";
+import { Copy, Edit3, Plus, Trash2 } from "lucide-react";
 import { MobileNavigation } from "@/components/finance/mobile-navigation";
 import { formatCurrency, formatMonth } from "@/lib/formatters";
 import { deleteTransactionAction } from "@/server/transactions/actions";
@@ -179,6 +179,13 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
                     {formatCurrency(transaction.amount)}
                   </strong>
                   <div className="mt-3 flex justify-end gap-1">
+                    <Link
+                      href={`/novo?duplicar=${transaction.id}`}
+                      className="flex size-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-slate-50 hover:text-slate-950"
+                      aria-label="Duplicar gasto"
+                    >
+                      <Copy size={17} aria-hidden="true" />
+                    </Link>
                     <Link
                       href={`/novo?id=${transaction.id}`}
                       className="flex size-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-slate-50 hover:text-slate-950"

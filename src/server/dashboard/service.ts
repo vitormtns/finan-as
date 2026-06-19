@@ -1,11 +1,13 @@
 import { TransactionType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency } from "@/lib/formatters";
+import { getFutureFixedExpensesForMonth } from "@/server/fixed-expenses/service";
 import type {
+  DailySpendingAllowance,
   DashboardCategory,
   DashboardOrientation,
   MonthlyDashboard,
-  RemainingFixedExpense,
+  WeeklySummary,
 } from "./types";
 
 function getCurrentMonthReference(date = new Date()) {
@@ -39,6 +41,154 @@ function decimalToNumber(value: { toString: () => string } | number | null) {
 
 function roundMoney(value: number) {
   return Math.round(value * 100) / 100;
+}
+
+function getStartOfWeek(date: Date) {
+  const startDate = new Date(date);
+  const dayOfWeek = startDate.getDay();
+  const daysSinceMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+
+  startDate.setHours(0, 0, 0, 0);
+  startDate.setDate(startDate.getDate() - daysSinceMonday);
+
+  return startDate;
+}
+
+function addDays(date: Date, days: number) {
+  const nextDate = new Date(date);
+  nextDate.setDate(nextDate.getDate() + days);
+
+  return nextDate;
+}
+
+function toDateKey(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+function createDailySpendingAllowance(params: {
+  budgetLimit: number | null;
+  availableRealAmount: number | null;
+  safeDailyAmount: number | null;
+  daysInMonth: number;
+}): DailySpendingAllowance {
+  const {
+    budgetLimit,
+    availableRealAmount,
+    safeDailyAmount,
+    daysInMonth,
+  } = params;
+
+  if (budgetLimit === null || availableRealAmount === null || safeDailyAmount === null) {
+    return {
+      availableRealAmount: null,
+      safeDailyAmount: null,
+      message:
+        "Configure sua meta mensal para saber quanto pode gastar hoje com segurança.",
+      tone: "info",
+    };
+  }
+
+  if (availableRealAmount < 0) {
+    return {
+      availableRealAmount,
+      safeDailyAmount,
+      message:
+        "Você já passou do limite planejado considerando os gastos fixos futuros.",
+      tone: "danger",
+    };
+  }
+
+  const healthyDailyReference = budgetLimit / daysInMonth;
+  const isTight = safeDailyAmount <= healthyDailyReference * 0.5;
+
+  if (isTight) {
+    return {
+      availableRealAmount,
+      safeDailyAmount,
+      message: `Seu limite seguro hoje está apertado: ${formatCurrency(safeDailyAmount)}.`,
+      tone: "warning",
+    };
+  }
+
+  return {
+    availableRealAmount,
+    safeDailyAmount,
+    message: `Você pode gastar até ${formatCurrency(safeDailyAmount)} hoje para manter o mês saudável.`,
+    tone: "success",
+  };
+}
+
+function createWeeklySummary(params: {
+  currentWeekTransactions: {
+    amount: { toString: () => string } | number;
+    category: { id: string; name: string; color: string | null } | null;
+  }[];
+  previousWeekTransactions: {
+    amount: { toString: () => string } | number;
+  }[];
+  elapsedDaysInWeek: number;
+}): WeeklySummary {
+  const {
+    currentWeekTransactions,
+    previousWeekTransactions,
+    elapsedDaysInWeek,
+  } = params;
+  const totalExpenses = roundMoney(
+    currentWeekTransactions.reduce(
+      (sum, transaction) => sum + decimalToNumber(transaction.amount),
+      0,
+    ),
+  );
+  const previousWeekExpenses = roundMoney(
+    previousWeekTransactions.reduce(
+      (sum, transaction) => sum + decimalToNumber(transaction.amount),
+      0,
+    ),
+  );
+  const categoryMap = new Map<string, { name: string; amount: number }>();
+
+  for (const transaction of currentWeekTransactions) {
+    const key = transaction.category?.id ?? "sem-categoria";
+    const current = categoryMap.get(key) ?? {
+      name: transaction.category?.name ?? "Sem categoria",
+      amount: 0,
+    };
+
+    current.amount += decimalToNumber(transaction.amount);
+    categoryMap.set(key, current);
+  }
+
+  const topCategory = Array.from(categoryMap.values()).sort(
+    (a, b) => b.amount - a.amount,
+  )[0];
+  const comparisonAmount =
+    previousWeekExpenses > 0 ? roundMoney(totalExpenses - previousWeekExpenses) : null;
+  const comparisonPercentage =
+    previousWeekExpenses > 0 && comparisonAmount !== null
+      ? Math.round((comparisonAmount / previousWeekExpenses) * 100)
+      : null;
+
+  return {
+    totalExpenses,
+    dailyAverage: roundMoney(totalExpenses / elapsedDaysInWeek),
+    topCategoryName: topCategory?.name ?? null,
+    topCategoryAmount: roundMoney(topCategory?.amount ?? 0),
+    previousWeekExpenses,
+    comparisonAmount,
+    comparisonPercentage,
+    comparisonTrend:
+      comparisonAmount === null
+        ? "none"
+        : comparisonAmount > 0
+          ? "up"
+          : comparisonAmount < 0
+            ? "down"
+            : "same",
+  };
 }
 
 function createOrientation(params: {
@@ -117,8 +267,29 @@ export async function getMonthlyDashboard(
   date = new Date(),
 ): Promise<MonthlyDashboard> {
   const reference = getCurrentMonthReference(date);
+  const currentWeekStartDate = getStartOfWeek(date);
+  const currentWeekEndDate = addDays(date, 1);
+  currentWeekEndDate.setHours(0, 0, 0, 0);
+  const previousWeekStartDate = addDays(currentWeekStartDate, -7);
+  const previousWeekEndDate = currentWeekStartDate;
+  const currentWeekStartKey = toDateKey(currentWeekStartDate);
+  const currentWeekEndKey = toDateKey(currentWeekEndDate);
+  const previousWeekStartKey = toDateKey(previousWeekStartDate);
+  const previousWeekEndKey = toDateKey(previousWeekEndDate);
+  const elapsedDaysInWeek = Math.max(
+    Math.ceil(
+      (currentWeekEndDate.getTime() - currentWeekStartDate.getTime()) /
+        86_400_000,
+    ),
+    1,
+  );
 
-  const [transactions, budget, fixedExpenses] = await Promise.all([
+  const [
+    transactions,
+    budget,
+    futureFixedExpenses,
+    weeklyTransactions,
+  ] = await Promise.all([
     prisma.transaction.findMany({
       where: {
         userId,
@@ -149,23 +320,24 @@ export async function getMonthlyDashboard(
         totalLimit: true,
       },
     }),
-    prisma.fixedExpense.findMany({
+    getFutureFixedExpensesForMonth(userId, date),
+    prisma.transaction.findMany({
       where: {
         userId,
-        active: true,
-        dueDay: {
-          gte: reference.currentDay,
+        type: TransactionType.EXPENSE,
+        date: {
+          gte: previousWeekStartDate,
+          lt: currentWeekEndDate,
         },
       },
       include: {
         category: {
           select: {
+            id: true,
             name: true,
+            color: true,
           },
         },
-      },
-      orderBy: {
-        dueDay: "asc",
       },
     }),
   ]);
@@ -228,18 +400,44 @@ export async function getMonthlyDashboard(
 
   const largestCategory = categoryExpenses[0] ?? null;
 
-  const remainingFixedExpenses: RemainingFixedExpense[] = fixedExpenses.map(
-    (fixedExpense) => ({
-      id: fixedExpense.id,
-      description: fixedExpense.description,
-      amount: decimalToNumber(fixedExpense.amount),
-      dueDay: fixedExpense.dueDay,
-      categoryName: fixedExpense.category?.name ?? "Sem categoria",
-    }),
+  const remainingFixedExpenses = futureFixedExpenses.expenses;
+  const remainingFixedExpensesTotal = futureFixedExpenses.total;
+  const overdueFixedExpensesTotal = futureFixedExpenses.overdueTotal;
+  const availableRealAmount =
+    budgetLimit === null
+      ? null
+      : roundMoney(
+          budgetLimit - totalExpenses - remainingFixedExpensesTotal,
+        );
+  const realSafeDailyLimit =
+    availableRealAmount === null
+      ? null
+      : roundMoney(Math.max(availableRealAmount, 0) / reference.remainingDays);
+  const dailySpendingAllowance = createDailySpendingAllowance({
+    budgetLimit,
+    availableRealAmount,
+    safeDailyAmount: realSafeDailyLimit,
+    daysInMonth: reference.daysInMonth,
+  });
+  const currentWeekTransactions = weeklyTransactions.filter(
+    (transaction) => {
+      const dateKey = toDateKey(transaction.date);
+
+      return dateKey >= currentWeekStartKey && dateKey < currentWeekEndKey;
+    },
   );
-  const remainingFixedExpensesTotal = roundMoney(
-    remainingFixedExpenses.reduce((sum, expense) => sum + expense.amount, 0),
+  const previousWeekTransactions = weeklyTransactions.filter(
+    (transaction) => {
+      const dateKey = toDateKey(transaction.date);
+
+      return dateKey >= previousWeekStartKey && dateKey < previousWeekEndKey;
+    },
   );
+  const weeklySummary = createWeeklySummary({
+    currentWeekTransactions,
+    previousWeekTransactions,
+    elapsedDaysInWeek,
+  });
   const dailyAverage = roundMoney(totalExpenses / reference.currentDay);
   const projectedMonthTotal = roundMoney(dailyAverage * reference.daysInMonth);
   const projectedBudgetDifference =
@@ -263,10 +461,13 @@ export async function getMonthlyDashboard(
     budgetLimit,
     availableAmount,
     safeDailyLimit,
+    dailySpendingAllowance,
     categoryExpenses,
     largestCategory,
     remainingFixedExpenses,
     remainingFixedExpensesTotal,
+    overdueFixedExpensesTotal,
+    weeklySummary,
     dailyAverage,
     projectedMonthTotal,
     projectedBudgetDifference,

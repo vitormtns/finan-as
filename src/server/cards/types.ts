@@ -1,4 +1,8 @@
 import type { PaymentMethod } from "@prisma/client";
+import type {
+  CardInvoicePurchase,
+  FutureInstallmentMonth,
+} from "./invoice";
 
 export type EditableCard = {
   id: string;
@@ -18,6 +22,17 @@ export type CardInvoiceTransaction = {
   installmentLabel: string | null;
 };
 
+export type CardInvoiceView = {
+  total: number;
+  periodStart: string;
+  periodEnd: string;
+  closingDate: string;
+  dueDate: string;
+  purchaseCount: number;
+  installmentCount: number;
+  purchases: CardInvoicePurchase[];
+};
+
 export type CardListItem = {
   id: string;
   name: string;
@@ -25,11 +40,15 @@ export type CardListItem = {
   limitAmount: number | null;
   closingDay: number | null;
   dueDay: number | null;
-  currentMonthTotal: number;
+  currentInvoiceTotal: number;
+  nextInvoiceTotal: number;
   usedPercentage: number | null;
   availableLimit: number | null;
+  limitAlert: boolean;
   linkedItemsCount: number;
-  invoiceTransactions: CardInvoiceTransaction[];
+  currentInvoice: CardInvoiceView;
+  nextInvoice: CardInvoiceView;
+  futureInstallments: FutureInstallmentMonth[];
 };
 
 export type CardsPageData = {

@@ -12,6 +12,7 @@ const baseInput: AlertRuleInput = {
   projectedMonthTotal: 2700,
   projectedBudgetDifference: -300,
   remainingFixedExpensesTotal: 0,
+  overdueFixedExpensesTotal: 0,
   weeklyExpenses: 300,
   categoryBudgetUsages: [],
   cardLimitUsages: [],
@@ -72,4 +73,17 @@ test("gera alerta de cartão acima de 80% do limite", () => {
   });
 
   assert.equal(alerts.some((alert) => alert.type === "card_limit_usage"), true);
+});
+
+test("gera alerta para gastos fixos vencidos ainda não pagos", () => {
+  const alerts = generateFinancialAlertRules({
+    ...baseInput,
+    remainingFixedExpensesTotal: 250,
+    overdueFixedExpensesTotal: 250,
+  });
+
+  assert.equal(
+    alerts.some((alert) => alert.type === "overdue_fixed_expenses"),
+    true,
+  );
 });

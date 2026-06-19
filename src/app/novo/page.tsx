@@ -7,6 +7,7 @@ import {
   findTransactionForEdit,
   listTransactionFormOptions,
 } from "@/server/transactions/repository";
+import { getTransactionDuplicateDraft } from "@/server/transactions/service";
 import type {
   EditableTransaction,
   TransactionFormOptions,
@@ -17,10 +18,11 @@ export const dynamic = "force-dynamic";
 type NewTransactionPageProps = {
   searchParams: Promise<{
     id?: string;
+    duplicar?: string;
   }>;
 };
 
-async function loadPageData(id?: string): Promise<{
+async function loadPageData(params: { id?: string; duplicateId?: string }): Promise<{
   options: TransactionFormOptions;
   transaction: EditableTransaction | null;
   error: string | null;
@@ -30,7 +32,11 @@ async function loadPageData(id?: string): Promise<{
   try {
     const [options, transaction] = await Promise.all([
       listTransactionFormOptions(userId),
-      id ? findTransactionForEdit(userId, id) : Promise.resolve(null),
+      params.id
+        ? findTransactionForEdit(userId, params.id)
+        : params.duplicateId
+          ? getTransactionDuplicateDraft(userId, params.duplicateId)
+          : Promise.resolve(null),
     ]);
 
     return { options, transaction, error: null };
@@ -47,9 +53,13 @@ async function loadPageData(id?: string): Promise<{
 export default async function NewTransactionPage({
   searchParams,
 }: NewTransactionPageProps) {
-  const { id } = await searchParams;
-  const { options, transaction, error } = await loadPageData(id);
+  const { id, duplicar } = await searchParams;
+  const { options, transaction, error } = await loadPageData({
+    id,
+    duplicateId: id ? undefined : duplicar,
+  });
   const isEditing = Boolean(id);
+  const isDuplicating = !isEditing && Boolean(duplicar);
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,#dbeafe_0,#f8fafc_34rem)] pb-28 md:pb-0">
@@ -64,10 +74,16 @@ export default async function NewTransactionPage({
           </Link>
 
           <h1 className="mt-5 text-3xl font-semibold text-slate-950">
-            {isEditing ? "Editar gasto" : "Novo gasto"}
+            {isEditing
+              ? "Editar gasto"
+              : isDuplicating
+                ? "Duplicar gasto"
+                : "Novo gasto"}
           </h1>
           <p className="mt-2 text-base leading-7 text-slate-600">
-            Registre uma movimentação em poucos campos e mantenha o mês em dia.
+            {isDuplicating
+              ? "Revise os dados copiados e salve para confirmar o novo gasto."
+              : "Registre uma movimentação em poucos campos e mantenha o mês em dia."}
           </p>
         </header>
 
@@ -90,7 +106,16 @@ export default async function NewTransactionPage({
           </section>
         ) : null}
 
-        {!error && (!isEditing || transaction) && options.categories.length > 0 ? (
+        {!error && isDuplicating && !transaction ? (
+          <section className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+            Transação não encontrada para duplicação.
+          </section>
+        ) : null}
+
+        {!error &&
+        (!isEditing || transaction) &&
+        (!isDuplicating || transaction) &&
+        options.categories.length > 0 ? (
           <TransactionForm
             options={options}
             initialTransaction={transaction}

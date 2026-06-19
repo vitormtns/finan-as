@@ -7,11 +7,21 @@ import {
   createTransactions,
   deleteTransaction,
   ensureProfile,
+  findTransactionForEdit,
   updateTransaction,
 } from "./repository";
+import type { EditableTransaction } from "./types";
 
 function toDateOnly(value: string) {
   return new Date(`${value}T00:00:00`);
+}
+
+function toDateInputValue(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
 }
 
 function addMonthsKeepingDay(date: Date, months: number) {
@@ -118,4 +128,25 @@ export async function editTransaction(
 
 export async function removeTransaction(userId: string, id: string) {
   await deleteTransaction(userId, id);
+}
+
+export async function getTransactionDuplicateDraft(
+  userId: string,
+  id: string,
+  date = new Date(),
+): Promise<EditableTransaction | null> {
+  const transaction = await findTransactionForEdit(userId, id);
+
+  if (!transaction) {
+    return null;
+  }
+
+  return {
+    ...transaction,
+    id: "",
+    date: toDateInputValue(date),
+    isInstallment: false,
+    installmentNumber: null,
+    totalInstallments: null,
+  };
 }

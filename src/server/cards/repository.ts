@@ -41,6 +41,76 @@ export async function listCardsWithCurrentMonthData(
   });
 }
 
+export async function listCardsWithInvoiceData(userId: string, fromDate: Date) {
+  return prisma.card.findMany({
+    where: { userId },
+    orderBy: { name: "asc" },
+    include: {
+      transactions: {
+        where: {
+          userId,
+          paymentMethod: PaymentMethod.CREDIT,
+          date: {
+            gte: fromDate,
+          },
+        },
+        orderBy: [{ date: "desc" }, { createdAt: "desc" }],
+        include: {
+          category: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      },
+      _count: {
+        select: {
+          transactions: true,
+          fixedExpenses: true,
+        },
+      },
+    },
+  });
+}
+
+export async function findCardWithInvoiceData(
+  userId: string,
+  id: string,
+  fromDate: Date,
+) {
+  return prisma.card.findFirst({
+    where: {
+      id,
+      userId,
+    },
+    include: {
+      transactions: {
+        where: {
+          userId,
+          paymentMethod: PaymentMethod.CREDIT,
+          date: {
+            gte: fromDate,
+          },
+        },
+        orderBy: [{ date: "desc" }, { createdAt: "desc" }],
+        include: {
+          category: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      },
+      _count: {
+        select: {
+          transactions: true,
+          fixedExpenses: true,
+        },
+      },
+    },
+  });
+}
+
 export async function findCardForEdit(userId: string, id: string) {
   return prisma.card.findFirst({
     where: {

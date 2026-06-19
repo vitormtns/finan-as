@@ -31,6 +31,7 @@ export type AlertRuleInput = {
   projectedMonthTotal: number;
   projectedBudgetDifference: number | null;
   remainingFixedExpensesTotal: number;
+  overdueFixedExpensesTotal: number;
   weeklyExpenses: number;
   categoryBudgetUsages: CategoryBudgetUsage[];
   cardLimitUsages: CardLimitUsage[];

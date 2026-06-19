@@ -93,6 +93,16 @@ export function generateFinancialAlertRules(
   }
 
   if (input.remainingFixedExpensesTotal > 0) {
+    if (input.overdueFixedExpensesTotal > 0) {
+      addAlert(alerts, {
+        type: "overdue_fixed_expenses",
+        title: "Fixos vencidos",
+        message: `Você tem ${formatCurrency(input.overdueFixedExpensesTotal)} em gastos fixos vencidos ainda não pagos.`,
+        severity: "warning",
+        priority: 88,
+      });
+    }
+
     const relevantThreshold =
       input.budgetLimit === null ? 100 : Math.max(100, input.budgetLimit * 0.05);
 
@@ -100,7 +110,7 @@ export function generateFinancialAlertRules(
       addAlert(alerts, {
         type: "remaining_fixed_expenses",
         title: "Fixos ainda pendentes",
-        message: `Ainda existem ${formatCurrency(input.remainingFixedExpensesTotal)} em gastos fixos previstos para este mês.`,
+        message: `Ainda existem ${formatCurrency(input.remainingFixedExpensesTotal)} em gastos fixos pendentes para este mês.`,
         severity: "info",
         priority: 45,
       });

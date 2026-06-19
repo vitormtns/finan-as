@@ -34,15 +34,20 @@ export type FixedExpenseListItem = {
   categoryName: string;
   categoryColor: string | null;
   cardName: string | null;
-  status: "upcoming" | "overdue" | "inactive";
+  status: "pending" | "paid" | "overdue" | "inactive";
+  paidAt: string | null;
+  paymentTransactionId: string | null;
+  latestPaidAt: string | null;
 };
 
 export type FixedExpensesSummary = {
   activeMonthlyTotal: number;
-  upcomingTotal: number;
+  pendingTotal: number;
   overdueTotal: number;
-  upcomingCount: number;
+  paidTotal: number;
+  pendingCount: number;
   overdueCount: number;
+  paidCount: number;
 };
 
 export type FixedExpensesPageData = {

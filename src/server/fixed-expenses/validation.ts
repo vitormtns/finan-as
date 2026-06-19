@@ -59,3 +59,9 @@ export const fixedExpenseFormSchema = z.object({
 });
 
 export type FixedExpenseFormInput = z.infer<typeof fixedExpenseFormSchema>;
+
+export const fixedExpensePaymentSchema = z.object({
+  id: z.string().trim().min(1, "Gasto fixo é obrigatório."),
+});
+
+export type FixedExpensePaymentInput = z.infer<typeof fixedExpensePaymentSchema>;
