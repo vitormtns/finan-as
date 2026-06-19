@@ -62,52 +62,54 @@ export default async function NewTransactionPage({
   const isDuplicating = !isEditing && Boolean(duplicar);
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,#dbeafe_0,#f8fafc_34rem)] pb-28 md:pb-0">
+    <div className="app-shell">
       <main className="mx-auto flex w-full max-w-2xl flex-col gap-5 px-4 py-5 sm:px-6 md:py-8">
-        <header>
+        <header className="premium-page-hero">
+          <div className="relative">
           <Link
             href="/gastos"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 transition hover:text-slate-950"
+            className="inline-flex items-center gap-2 rounded-full bg-white/70 px-3 py-2 text-sm font-bold text-[var(--app-primary)] shadow-sm transition hover:bg-white"
           >
             <ArrowLeft size={17} aria-hidden="true" />
             Voltar para gastos
           </Link>
 
-          <h1 className="mt-5 text-3xl font-semibold text-slate-950">
+          <h1 className="mt-5 app-title">
             {isEditing
               ? "Editar gasto"
               : isDuplicating
                 ? "Duplicar gasto"
                 : "Novo gasto"}
           </h1>
-          <p className="mt-2 text-base leading-7 text-slate-600">
+          <p className="app-subtitle mt-2">
             {isDuplicating
               ? "Revise os dados copiados e salve para confirmar o novo gasto."
               : "Registre uma movimentação em poucos campos e mantenha o mês em dia."}
           </p>
+          </div>
         </header>
 
         {error ? (
-          <section className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          <section className="alert-danger p-4 text-sm">
             {error}
           </section>
         ) : null}
 
         {!error && options.categories.length === 0 ? (
-          <section className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-800">
+          <section className="alert-warning p-4 text-sm leading-6">
             Nenhuma categoria encontrada. Rode o seed inicial para cadastrar as
             categorias padrão antes de salvar gastos.
           </section>
         ) : null}
 
         {!error && isEditing && !transaction ? (
-          <section className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+          <section className="alert-warning p-4 text-sm">
             Transação não encontrada para edição.
           </section>
         ) : null}
 
         {!error && isDuplicating && !transaction ? (
-          <section className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+          <section className="alert-warning p-4 text-sm">
             Transação não encontrada para duplicação.
           </section>
         ) : null}
@@ -126,3 +128,4 @@ export default async function NewTransactionPage({
     </div>
   );
 }
+

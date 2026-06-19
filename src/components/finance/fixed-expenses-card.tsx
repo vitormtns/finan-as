@@ -8,18 +8,18 @@ type FixedExpensesCardProps = {
 
 export function FixedExpensesCard({ expenses, total }: FixedExpensesCardProps) {
   return (
-    <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/70">
+    <section className="app-card p-4">
       <div>
-        <h2 className="text-base font-semibold text-slate-950">
+        <h2 className="text-base font-bold text-[var(--app-ink)]">
           Fixos restantes
         </h2>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-[var(--app-ink-muted)]">
           Gastos fixos do mês que ainda não foram pagos
         </p>
       </div>
 
       {expenses.length === 0 ? (
-        <div className="mt-5 rounded-lg border border-dashed border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-500">
+        <div className="mt-5 empty-state text-sm leading-6">
           Nenhum gasto fixo pendente para este mês.
         </div>
       ) : (
@@ -33,7 +33,7 @@ export function FixedExpensesCard({ expenses, total }: FixedExpensesCardProps) {
                 <p className="truncate text-sm font-medium text-slate-800">
                   {expense.description}
                 </p>
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs text-[var(--app-ink-muted)]">
                   {expense.categoryName} •{" "}
                   {expense.status === "overdue" ? "vencido" : "vence"} dia{" "}
                   {expense.dueDay}
@@ -47,12 +47,13 @@ export function FixedExpensesCard({ expenses, total }: FixedExpensesCardProps) {
         </div>
       )}
 
-      <div className="mt-5 rounded-lg bg-slate-50 p-3">
-        <p className="text-xs font-medium text-slate-500">Total estimado</p>
-        <strong className="mt-1 block text-lg font-semibold text-slate-950">
+      <div className="mt-5 metric-tile">
+        <p className="text-xs font-semibold text-[var(--app-ink-muted)]">Total estimado</p>
+        <strong className="mt-1 block text-lg font-bold text-[var(--app-ink)]">
           {formatCurrency(total)}
         </strong>
       </div>
     </section>
   );
 }
+

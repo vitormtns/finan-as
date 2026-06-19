@@ -33,7 +33,7 @@ function SubmitButton({ isEditing }: { isEditing: boolean }) {
     <button
       type="submit"
       disabled={pending}
-      className="min-h-12 w-full rounded-full bg-slate-950 px-5 text-sm font-semibold text-white shadow-lg shadow-slate-950/20 transition hover:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-blue-200 disabled:cursor-not-allowed disabled:opacity-60"
+      className="btn-primary min-h-12 w-full disabled:cursor-not-allowed disabled:opacity-60"
     >
       {pending
         ? "Salvando..."
@@ -68,7 +68,7 @@ export function FixedExpenseForm({
   return (
     <form
       action={formAction}
-      className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/70 sm:p-5"
+      className="premium-panel p-5 sm:p-6"
     >
       {initialExpense ? (
         <input type="hidden" name="id" value={initialExpense.id} />
@@ -77,7 +77,7 @@ export function FixedExpenseForm({
       <div className="grid gap-4">
         <div>
           <label
-            className="text-sm font-semibold text-slate-700"
+            className="form-label"
             htmlFor="description"
           >
             Descrição
@@ -87,7 +87,7 @@ export function FixedExpenseForm({
             name="description"
             placeholder="Ex.: internet, academia, celular"
             defaultValue={initialExpense?.description ?? ""}
-            className="mt-2 min-h-12 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 text-sm text-slate-950 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100"
+            className="form-control mt-2"
           />
           <FieldError errors={state.fieldErrors?.description} />
         </div>
@@ -95,7 +95,7 @@ export function FixedExpenseForm({
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label
-              className="text-sm font-semibold text-slate-700"
+              className="form-label"
               htmlFor="amount"
             >
               Valor
@@ -106,14 +106,14 @@ export function FixedExpenseForm({
               inputMode="decimal"
               placeholder="0,00"
               defaultValue={initialExpense?.amount ?? ""}
-              className="mt-2 min-h-12 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 text-base font-semibold text-slate-950 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100"
+              className="form-control mt-2 text-base font-bold"
             />
             <FieldError errors={state.fieldErrors?.amount} />
           </div>
 
           <div>
             <label
-              className="text-sm font-semibold text-slate-700"
+              className="form-label"
               htmlFor="dueDay"
             >
               Dia de vencimento
@@ -126,7 +126,7 @@ export function FixedExpenseForm({
               max={31}
               placeholder="10"
               defaultValue={initialExpense?.dueDay ?? ""}
-              className="mt-2 min-h-12 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 text-sm text-slate-950 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100"
+              className="form-control mt-2"
             />
             <FieldError errors={state.fieldErrors?.dueDay} />
           </div>
@@ -134,7 +134,7 @@ export function FixedExpenseForm({
 
         <div>
           <label
-            className="text-sm font-semibold text-slate-700"
+            className="form-label"
             htmlFor="categoryId"
           >
             Categoria
@@ -143,7 +143,7 @@ export function FixedExpenseForm({
             id="categoryId"
             name="categoryId"
             defaultValue={initialExpense?.categoryId ?? ""}
-            className="mt-2 min-h-12 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 text-sm text-slate-950 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100"
+            className="form-control mt-2"
           >
             <option value="">Sem categoria</option>
             {options.categories.map((category) => (
@@ -157,7 +157,7 @@ export function FixedExpenseForm({
 
         <div>
           <label
-            className="text-sm font-semibold text-slate-700"
+            className="form-label"
             htmlFor="paymentMethod"
           >
             Forma de pagamento
@@ -169,7 +169,7 @@ export function FixedExpenseForm({
             onChange={(event) =>
               setPaymentMethod(event.target.value as PaymentMethod)
             }
-            className="mt-2 min-h-12 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 text-sm text-slate-950 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100"
+            className="form-control mt-2"
           >
             {PAYMENT_METHOD_OPTIONS.map((method) => (
               <option key={method.value} value={method.value}>
@@ -183,7 +183,7 @@ export function FixedExpenseForm({
         {showCardField ? (
           <div>
             <label
-              className="text-sm font-semibold text-slate-700"
+              className="form-label"
               htmlFor="cardId"
             >
               Cartão
@@ -192,7 +192,7 @@ export function FixedExpenseForm({
               id="cardId"
               name="cardId"
               defaultValue={initialExpense?.cardId ?? ""}
-              className="mt-2 min-h-12 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 text-sm text-slate-950 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100"
+              className="form-control mt-2"
             >
               <option value="">Sem cartão vinculado</option>
               {options.cards.map((card) => (
@@ -205,12 +205,12 @@ export function FixedExpenseForm({
           </div>
         ) : null}
 
-        <label className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
+        <label className="flex items-center justify-between gap-3 rounded-2xl border border-white/70 bg-white/64 p-4 shadow-sm">
           <span>
             <span className="block text-sm font-semibold text-slate-800">
               Gasto ativo
             </span>
-            <span className="mt-1 block text-xs text-slate-500">
+            <span className="mt-1 block text-xs text-[var(--app-ink-muted)]">
               Gastos inativos ficam salvos, mas não entram na dashboard.
             </span>
           </span>
@@ -240,3 +240,4 @@ export function FixedExpenseForm({
     </form>
   );
 }
+

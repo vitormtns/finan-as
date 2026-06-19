@@ -9,10 +9,10 @@ type FinancialSummaryCardProps = {
 };
 
 const toneStyles = {
-  primary: "border-blue-100 bg-blue-50 text-blue-700",
-  success: "border-emerald-100 bg-emerald-50 text-emerald-700",
-  warning: "border-amber-100 bg-amber-50 text-amber-700",
-  neutral: "border-slate-200 bg-white text-slate-700",
+  primary: "border-[color-mix(in_srgb,var(--app-primary)_18%,var(--app-border))] bg-[var(--app-primary-soft)] text-[var(--app-primary)]",
+  success: "border-[color-mix(in_srgb,var(--app-accent)_18%,var(--app-border))] bg-[var(--app-accent-soft)] text-[var(--app-accent)]",
+  warning: "border-[color-mix(in_srgb,var(--app-warning)_20%,var(--app-border))] bg-[var(--app-warning-soft)] text-[var(--app-warning)]",
+  neutral: "border-[var(--app-border)] bg-[var(--app-surface)] text-[var(--app-primary)]",
 };
 
 export function FinancialSummaryCard({
@@ -23,11 +23,11 @@ export function FinancialSummaryCard({
   tone = "neutral",
 }: FinancialSummaryCardProps) {
   return (
-    <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/70">
+    <article className="app-card p-4">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-sm font-medium text-slate-500">{title}</p>
-          <strong className="mt-2 block text-2xl font-semibold text-slate-950">
+          <p className="text-sm font-semibold text-[var(--app-ink-muted)]">{title}</p>
+          <strong className="mt-2 block text-2xl font-bold tracking-normal text-[var(--app-ink)]">
             {value}
           </strong>
         </div>
@@ -38,7 +38,7 @@ export function FinancialSummaryCard({
           <Icon size={19} strokeWidth={2.2} />
         </span>
       </div>
-      <p className="mt-3 text-sm leading-5 text-slate-500">{description}</p>
+      <p className="mt-3 text-sm leading-5 text-[var(--app-ink-muted)]">{description}</p>
     </article>
   );
 }

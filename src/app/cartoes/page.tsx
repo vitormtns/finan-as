@@ -50,23 +50,25 @@ export default async function CardsPage({ searchParams }: CardsPageProps) {
   const isEditing = Boolean(editar);
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,#dbeafe_0,#f8fafc_34rem)] pb-28 md:pb-0">
+    <div className="app-shell">
       <main className="mx-auto flex w-full max-w-6xl flex-col gap-5 px-4 py-5 sm:px-6 md:py-8">
-        <header>
-          <div className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-white/80 px-3 py-1 text-sm font-medium text-blue-700 shadow-sm shadow-blue-100/70">
+        <header className="premium-page-hero">
+          <div className="relative">
+          <div className="app-kicker">
             <CreditCard size={16} aria-hidden="true" />
             Fatura manual
           </div>
-          <h1 className="mt-4 text-3xl font-semibold text-slate-950">
+          <h1 className="mt-4 app-title">
             Cartões
           </h1>
-          <p className="mt-2 max-w-xl text-base leading-7 text-slate-600">
+          <p className="app-subtitle mt-2 max-w-xl">
             Cadastre cartões manuais e acompanhe quanto já foi usado no crédito.
           </p>
+          </div>
         </header>
 
         {error ? (
-          <section className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          <section className="alert-danger p-4 text-sm">
             {error}
           </section>
         ) : null}
@@ -75,16 +77,16 @@ export default async function CardsPage({ searchParams }: CardsPageProps) {
           <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
             <section>
               <div className="mb-3">
-                <h2 className="text-base font-semibold text-slate-950">
+                <h2 className="text-base font-bold text-[var(--app-ink)]">
                   {isEditing ? "Editar cartão" : "Novo cartão"}
                 </h2>
-                <p className="mt-1 text-sm text-slate-500">
+                <p className="mt-1 text-sm text-[var(--app-ink-muted)]">
                   Use dados manuais. Nenhuma integração bancária é feita.
                 </p>
               </div>
 
               {isEditing && !editableCard ? (
-                <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                <div className="alert-warning p-4 text-sm">
                   Cartão não encontrado para edição.
                 </div>
               ) : (
@@ -94,17 +96,17 @@ export default async function CardsPage({ searchParams }: CardsPageProps) {
 
             <section className="space-y-3">
               <div>
-                <h2 className="text-base font-semibold text-slate-950">
+                <h2 className="text-base font-bold text-[var(--app-ink)]">
                   Cartões cadastrados
                 </h2>
-                <p className="mt-1 text-sm text-slate-500">
+                <p className="mt-1 text-sm text-[var(--app-ink-muted)]">
                   Faturas calculadas pelo fechamento de cada cartão.
                 </p>
               </div>
 
               {data.cards.length === 0 ? (
-                <div className="rounded-lg border border-slate-200 bg-white p-6 text-center shadow-sm shadow-slate-200/70">
-                  <h3 className="text-base font-semibold text-slate-950">
+                <div className="app-card p-6 text-center">
+                  <h3 className="text-base font-bold text-[var(--app-ink)]">
                     Nenhum cartão cadastrado
                   </h3>
                   <p className="mt-2 text-sm leading-6 text-slate-500">
@@ -121,7 +123,7 @@ export default async function CardsPage({ searchParams }: CardsPageProps) {
                 return (
                   <article
                     key={card.id}
-                    className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm shadow-slate-200/70"
+                    className="app-card overflow-hidden"
                   >
                     <Link
                       href={`/cartoes/${card.id}`}
@@ -163,7 +165,7 @@ export default async function CardsPage({ searchParams }: CardsPageProps) {
                     <div className="p-4">
                       {card.limitAmount !== null ? (
                         <div>
-                          <div className="flex items-center justify-between gap-3 text-xs text-slate-500">
+                          <div className="flex items-center justify-between gap-3 text-xs text-[var(--app-ink-muted)]">
                             <span>{progress}% do limite</span>
                             <span>{formatCurrency(card.limitAmount)}</span>
                           </div>
@@ -189,12 +191,12 @@ export default async function CardsPage({ searchParams }: CardsPageProps) {
                           ) : null}
                         </div>
                       ) : (
-                        <p className="text-sm text-slate-500">
+                        <p className="text-sm text-[var(--app-ink-muted)]">
                           Limite não definido para este cartão.
                         </p>
                       )}
 
-                      <div className="mt-4 grid gap-2 rounded-lg bg-slate-50 p-3 text-sm text-slate-600 sm:grid-cols-2">
+                      <div className="mt-4 grid gap-2 metric-tile text-sm text-slate-600 sm:grid-cols-2">
                         <span>
                           Fecha em {formatDate(card.currentInvoice.closingDate)}
                         </span>
@@ -210,7 +212,7 @@ export default async function CardsPage({ searchParams }: CardsPageProps) {
                       </div>
 
                       <div className="mt-3 grid gap-2 text-sm sm:grid-cols-2">
-                        <div className="rounded-lg bg-slate-50 p-3">
+                        <div className="metric-tile">
                           <p className="text-xs font-medium text-slate-500">
                             Disponível
                           </p>
@@ -220,7 +222,7 @@ export default async function CardsPage({ searchParams }: CardsPageProps) {
                               : formatCurrency(card.availableLimit)}
                           </strong>
                         </div>
-                        <div className="rounded-lg bg-slate-50 p-3">
+                        <div className="metric-tile">
                           <p className="text-xs font-medium text-slate-500">
                             Compras na fatura
                           </p>
@@ -239,7 +241,7 @@ export default async function CardsPage({ searchParams }: CardsPageProps) {
                         </Link>
                         <Link
                           href={`/cartoes?editar=${card.id}&cartao=${card.id}`}
-                          className="flex size-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-slate-50 hover:text-slate-950"
+                          className="icon-button size-9"
                           aria-label="Editar cartão"
                         >
                           <Edit3 size={17} aria-hidden="true" />
@@ -250,7 +252,7 @@ export default async function CardsPage({ searchParams }: CardsPageProps) {
                             <input type="hidden" name="id" value={card.id} />
                             <button
                               type="submit"
-                              className="flex size-9 items-center justify-center rounded-lg border border-red-100 text-red-500 transition hover:bg-red-50"
+                              className="btn-danger size-9"
                               aria-label="Excluir cartão"
                             >
                               <Trash2 size={17} aria-hidden="true" />
@@ -274,3 +276,4 @@ export default async function CardsPage({ searchParams }: CardsPageProps) {
     </div>
   );
 }
+

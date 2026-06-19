@@ -15,28 +15,28 @@ export function MonthProjectionCard({
   const isAboveBudget = hasBudget && projectedBudgetDifference > 0;
 
   return (
-    <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/70">
+    <section className="app-card p-4">
       <div>
-        <h2 className="text-base font-semibold text-slate-950">
+        <h2 className="text-base font-bold text-[var(--app-ink)]">
           Projeção do mês
         </h2>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-[var(--app-ink-muted)]">
           Estimativa com base na média diária atual
         </p>
       </div>
 
       <div className="mt-5 grid gap-3">
-        <div className="rounded-lg bg-slate-50 p-3">
-          <p className="text-xs font-medium text-slate-500">Média diária</p>
-          <strong className="mt-1 block text-lg font-semibold text-slate-950">
+        <div className="metric-tile">
+          <p className="text-xs font-semibold text-[var(--app-ink-muted)]">Média diária</p>
+          <strong className="mt-1 block text-lg font-bold text-[var(--app-ink)]">
             {formatCurrency(dailyAverage)}
           </strong>
         </div>
-        <div className="rounded-lg bg-slate-50 p-3">
-          <p className="text-xs font-medium text-slate-500">
+        <div className="metric-tile">
+          <p className="text-xs font-semibold text-[var(--app-ink-muted)]">
             Fechamento projetado
           </p>
-          <strong className="mt-1 block text-lg font-semibold text-slate-950">
+          <strong className="mt-1 block text-lg font-bold text-[var(--app-ink)]">
             {formatCurrency(projectedMonthTotal)}
           </strong>
         </div>
@@ -60,3 +60,4 @@ export function MonthProjectionCard({
     </section>
   );
 }
+

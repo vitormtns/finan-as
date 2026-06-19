@@ -34,34 +34,34 @@ export function WeeklySummaryCard({ summary }: WeeklySummaryCardProps) {
   const ComparisonIcon = isAbovePreviousWeek ? TrendingUp : TrendingDown;
 
   return (
-    <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/70">
+    <section className="app-card p-4">
       <div>
-        <h2 className="text-base font-semibold text-slate-950">Esta semana</h2>
-        <p className="mt-1 text-sm text-slate-500">
+        <h2 className="text-base font-bold text-[var(--app-ink)]">Esta semana</h2>
+        <p className="mt-1 text-sm text-[var(--app-ink-muted)]">
           Ritmo dos gastos desde segunda-feira.
         </p>
       </div>
 
       <div className="mt-5 grid gap-3 sm:grid-cols-3">
-        <div className="rounded-lg bg-slate-50 p-3">
-          <p className="text-xs font-medium text-slate-500">Total gasto</p>
-          <strong className="mt-1 block text-lg font-semibold text-slate-950">
+        <div className="metric-tile">
+          <p className="text-xs font-semibold text-[var(--app-ink-muted)]">Total gasto</p>
+          <strong className="mt-1 block text-lg font-bold text-[var(--app-ink)]">
             {formatCurrency(summary.totalExpenses)}
           </strong>
         </div>
-        <div className="rounded-lg bg-slate-50 p-3">
-          <p className="text-xs font-medium text-slate-500">Média diária</p>
-          <strong className="mt-1 block text-lg font-semibold text-slate-950">
+        <div className="metric-tile">
+          <p className="text-xs font-semibold text-[var(--app-ink-muted)]">Média diária</p>
+          <strong className="mt-1 block text-lg font-bold text-[var(--app-ink)]">
             {formatCurrency(summary.dailyAverage)}
           </strong>
         </div>
-        <div className="rounded-lg bg-slate-50 p-3">
-          <p className="text-xs font-medium text-slate-500">Maior peso</p>
-          <strong className="mt-1 block truncate text-lg font-semibold text-slate-950">
+        <div className="metric-tile">
+          <p className="text-xs font-semibold text-[var(--app-ink-muted)]">Maior peso</p>
+          <strong className="mt-1 block truncate text-lg font-bold text-[var(--app-ink)]">
             {summary.topCategoryName ?? "Sem gastos"}
           </strong>
           {summary.topCategoryName ? (
-            <span className="mt-1 block text-xs text-slate-500">
+            <span className="mt-1 block text-xs text-[var(--app-ink-muted)]">
               {formatCurrency(summary.topCategoryAmount)}
             </span>
           ) : null}
@@ -81,3 +81,4 @@ export function WeeklySummaryCard({ summary }: WeeklySummaryCardProps) {
     </section>
   );
 }
+

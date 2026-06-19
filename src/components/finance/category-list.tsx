@@ -17,16 +17,16 @@ export function CategoryList({
   subtitle = "Distribuição do mês atual",
 }: CategoryListProps) {
   return (
-    <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/70">
+    <section className="app-card p-4">
       <div>
-        <h2 className="text-base font-semibold text-slate-950">
+        <h2 className="text-base font-bold text-[var(--app-ink)]">
           Gastos por categoria
         </h2>
-        <p className="mt-1 text-sm text-slate-500">{subtitle}</p>
+        <p className="mt-1 text-sm text-[var(--app-ink-muted)]">{subtitle}</p>
       </div>
 
       {categories.length === 0 ? (
-        <div className="mt-5 rounded-lg border border-dashed border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-500">
+        <div className="mt-5 empty-state text-sm leading-6">
           Nenhuma despesa registrada neste mês. Quando você lançar gastos, as
           categorias aparecem aqui automaticamente.
         </div>
@@ -49,7 +49,7 @@ export function CategoryList({
                 <strong className="block text-sm font-semibold text-slate-950">
                   {formatCurrency(category.amount)}
                 </strong>
-                <span className="text-xs text-slate-500">
+                <span className="text-xs text-[var(--app-ink-muted)]">
                   {category.percentage}%
                 </span>
               </div>
@@ -70,3 +70,4 @@ export function CategoryList({
     </section>
   );
 }
+

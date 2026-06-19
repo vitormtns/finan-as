@@ -37,7 +37,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0f172a",
+  themeColor: "#0f2633",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -53,7 +53,7 @@ export default function RootLayout({
       lang="pt-BR"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full overflow-x-hidden bg-slate-50 text-slate-950">
+      <body className="min-h-full overflow-x-hidden bg-[var(--background)] text-[var(--app-ink)]">
         {children}
         <ServiceWorkerRegister />
       </body>

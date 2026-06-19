@@ -62,23 +62,25 @@ export default async function GoalsPage({ searchParams }: GoalsPageProps) {
   const difference = goals?.difference ?? null;
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,#dbeafe_0,#f8fafc_34rem)] pb-28 md:pb-0">
+    <div className="app-shell">
       <main className="mx-auto flex w-full max-w-4xl flex-col gap-5 px-4 py-5 sm:px-6 md:py-8">
-        <header>
-          <div className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-white/80 px-3 py-1 text-sm font-medium text-blue-700 shadow-sm shadow-blue-100/70">
+        <header className="premium-page-hero">
+          <div className="relative">
+          <div className="app-kicker">
             <CalendarDays size={16} aria-hidden="true" />
             {formatMonth(new Date(year, month - 1, 1))}
           </div>
-          <h1 className="mt-4 text-3xl font-semibold text-slate-950">Metas</h1>
-          <p className="mt-2 max-w-xl text-base leading-7 text-slate-600">
+          <h1 className="mt-4 app-title">Metas</h1>
+          <p className="app-subtitle mt-2 max-w-xl">
             Configure seus limites do mês sem transformar a rotina em planilha.
           </p>
+          </div>
         </header>
 
-        <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/70">
+        <section className="premium-panel p-4">
           <form className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <label className="text-sm font-semibold text-slate-700" htmlFor="mes">
+              <label className="form-label" htmlFor="mes">
                 Selecionar mês e ano
               </label>
               <input
@@ -86,12 +88,12 @@ export default async function GoalsPage({ searchParams }: GoalsPageProps) {
                 name="mes"
                 type="month"
                 defaultValue={inputValue}
-                className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100 sm:w-48"
+                className="form-control mt-2 min-h-11 sm:w-48"
               />
             </div>
             <button
               type="submit"
-              className="min-h-11 rounded-lg border border-slate-200 bg-slate-50 px-4 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-white focus:outline-none focus:ring-4 focus:ring-blue-100"
+              className="btn-secondary min-h-11"
             >
               Carregar metas
             </button>
@@ -99,7 +101,7 @@ export default async function GoalsPage({ searchParams }: GoalsPageProps) {
         </section>
 
         {error ? (
-          <section className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          <section className="alert-danger p-4 text-sm">
             {error}
           </section>
         ) : null}
@@ -107,28 +109,28 @@ export default async function GoalsPage({ searchParams }: GoalsPageProps) {
         {goals ? (
           <>
             <section className="grid gap-3 sm:grid-cols-3">
-              <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/70">
-                <p className="text-sm font-medium text-slate-500">
+              <article className="app-card p-4">
+                <p className="text-sm font-semibold text-[var(--app-ink-muted)]">
                   Meta mensal geral
                 </p>
-                <strong className="mt-2 block text-2xl font-semibold text-slate-950">
+                <strong className="mt-2 block text-2xl font-bold text-[var(--app-ink)]">
                   {goals.totalLimit === null
                     ? "Não definida"
                     : formatCurrency(goals.totalLimit)}
                 </strong>
               </article>
 
-              <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/70">
-                <p className="text-sm font-medium text-slate-500">
+              <article className="app-card p-4">
+                <p className="text-sm font-semibold text-[var(--app-ink-muted)]">
                   Soma das categorias
                 </p>
-                <strong className="mt-2 block text-2xl font-semibold text-slate-950">
+                <strong className="mt-2 block text-2xl font-bold text-[var(--app-ink)]">
                   {formatCurrency(goals.totalCategoryLimits)}
                 </strong>
               </article>
 
-              <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/70">
-                <p className="text-sm font-medium text-slate-500">Diferença</p>
+              <article className="app-card p-4">
+                <p className="text-sm font-semibold text-[var(--app-ink-muted)]">Diferença</p>
                 <strong
                   className={`mt-2 block text-2xl font-semibold ${
                     difference !== null && difference < 0
@@ -138,7 +140,7 @@ export default async function GoalsPage({ searchParams }: GoalsPageProps) {
                 >
                   {difference === null ? "Sem meta" : formatCurrency(difference)}
                 </strong>
-                <p className="mt-2 text-sm text-slate-500">
+                <p className="mt-2 text-sm text-[var(--app-ink-muted)]">
                   {difference === null
                     ? "Defina a meta mensal para comparar."
                     : difference < 0
@@ -149,7 +151,7 @@ export default async function GoalsPage({ searchParams }: GoalsPageProps) {
             </section>
 
             {goals.categories.length === 0 ? (
-              <section className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-800">
+              <section className="alert-warning p-4 text-sm leading-6">
                 Nenhuma categoria de despesa encontrada. Rode o seed inicial ou
                 cadastre categorias antes de configurar metas.
               </section>
@@ -163,3 +165,4 @@ export default async function GoalsPage({ searchParams }: GoalsPageProps) {
     </div>
   );
 }
+

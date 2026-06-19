@@ -9,24 +9,24 @@ type AlertCardProps = {
 
 const toneStyles = {
   info: {
-    section: "border-blue-200 bg-blue-50 shadow-blue-100/70",
-    icon: "bg-blue-600",
-    status: "text-blue-700",
+    section: "border-[color-mix(in_srgb,var(--app-primary)_18%,var(--app-border))] bg-[var(--app-primary-soft)]",
+    icon: "bg-[var(--app-primary)]",
+    status: "text-[var(--app-primary)]",
   },
   success: {
-    section: "border-emerald-200 bg-emerald-50 shadow-emerald-100/70",
-    icon: "bg-emerald-600",
-    status: "text-emerald-700",
+    section: "border-[color-mix(in_srgb,var(--app-accent)_18%,var(--app-border))] bg-[var(--app-accent-soft)]",
+    icon: "bg-[var(--app-accent)]",
+    status: "text-[var(--app-accent)]",
   },
   warning: {
-    section: "border-amber-200 bg-amber-50 shadow-amber-100/70",
-    icon: "bg-amber-500",
-    status: "text-amber-700",
+    section: "border-[color-mix(in_srgb,var(--app-warning)_22%,var(--app-border))] bg-[var(--app-warning-soft)]",
+    icon: "bg-[var(--app-warning)]",
+    status: "text-[var(--app-warning)]",
   },
   danger: {
-    section: "border-red-200 bg-red-50 shadow-red-100/70",
-    icon: "bg-red-600",
-    status: "text-red-700",
+    section: "border-[color-mix(in_srgb,var(--app-danger)_18%,var(--app-border))] bg-[var(--app-danger-soft)]",
+    icon: "bg-[var(--app-danger)]",
+    status: "text-[var(--app-danger)]",
   },
 };
 
@@ -51,10 +51,10 @@ export function AlertCard({
           <p className={`text-xs font-semibold uppercase ${styles.status}`}>
             {status}
           </p>
-          <h2 className="mt-1 text-base font-semibold text-slate-950">
+          <h2 className="mt-1 text-base font-bold text-[var(--app-ink)]">
             {title}
           </h2>
-          <p className="mt-1 text-sm leading-5 text-slate-700">
+          <p className="mt-1 text-sm leading-5 text-[var(--app-ink-muted)]">
             {description}
           </p>
         </div>

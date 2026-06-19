@@ -30,7 +30,7 @@ function SaveButton() {
     <button
       type="submit"
       disabled={pending}
-      className="min-h-12 w-full rounded-full bg-slate-950 px-5 text-sm font-semibold text-white shadow-lg shadow-slate-950/20 transition hover:bg-slate-800 focus:outline-none focus:ring-4 focus:ring-blue-200 disabled:cursor-not-allowed disabled:opacity-60"
+      className="btn-primary min-h-12 w-full disabled:cursor-not-allowed disabled:opacity-60"
     >
       {pending ? "Salvando..." : "Salvar metas"}
     </button>
@@ -53,9 +53,9 @@ export function GoalsForm({ goals }: GoalsFormProps) {
       <input type="hidden" name="month" value={goals.month} />
       <input type="hidden" name="year" value={goals.year} />
 
-      <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/70">
+      <section className="premium-panel p-5">
         <label
-          className="text-sm font-semibold text-slate-700"
+          className="form-label"
           htmlFor="totalLimit"
         >
           Meta mensal geral
@@ -66,17 +66,17 @@ export function GoalsForm({ goals }: GoalsFormProps) {
           inputMode="decimal"
           placeholder="0,00"
           defaultValue={formatInputValue(goals.totalLimit)}
-          className="mt-2 min-h-12 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 text-base font-semibold text-slate-950 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100"
+          className="form-control mt-2 text-base font-bold"
         />
         <FieldError errors={state.fieldErrors?.totalLimit} />
       </section>
 
       <section className="space-y-3">
         <div>
-          <h2 className="text-base font-semibold text-slate-950">
+          <h2 className="text-base font-bold text-[var(--app-ink)]">
             Metas por categoria
           </h2>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-[var(--app-ink-muted)]">
             Defina limites mensais para as categorias de despesa.
           </p>
         </div>
@@ -88,7 +88,7 @@ export function GoalsForm({ goals }: GoalsFormProps) {
           return (
             <article
               key={category.id}
-              className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/70"
+              className="premium-panel p-5"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
@@ -102,7 +102,7 @@ export function GoalsForm({ goals }: GoalsFormProps) {
                       {category.name}
                     </h3>
                   </div>
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="mt-1 text-xs text-[var(--app-ink-muted)]">
                     Gasto no mês: {formatCurrency(category.spentAmount)}
                   </p>
                 </div>
@@ -114,7 +114,7 @@ export function GoalsForm({ goals }: GoalsFormProps) {
               </div>
 
               <label
-                className="mt-4 block text-sm font-semibold text-slate-700"
+                className="mt-4 block form-label"
                 htmlFor={`category-${category.id}`}
               >
                 Limite mensal
@@ -125,7 +125,7 @@ export function GoalsForm({ goals }: GoalsFormProps) {
                 inputMode="decimal"
                 placeholder="Sem meta"
                 defaultValue={formatInputValue(category.limitAmount)}
-                className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 text-sm text-slate-950 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100"
+                className="form-control mt-2 min-h-11"
               />
 
               <div className="mt-4 h-2 rounded-full bg-slate-100">
@@ -159,3 +159,4 @@ export function GoalsForm({ goals }: GoalsFormProps) {
     </form>
   );
 }
+

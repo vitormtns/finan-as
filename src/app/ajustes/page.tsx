@@ -101,34 +101,36 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
   const isEditing = Boolean(editar);
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,#dbeafe_0,#f8fafc_34rem)] pb-28 md:pb-0">
+    <div className="app-shell">
       <main className="mx-auto flex w-full max-w-5xl flex-col gap-5 px-4 py-5 sm:px-6 md:py-8">
-        <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <header className="premium-page-hero">
+          <div className="relative flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-white/80 px-3 py-1 text-sm font-medium text-blue-700 shadow-sm shadow-blue-100/70">
+            <div className="app-kicker">
               <CalendarClock size={16} aria-hidden="true" />
               Ajustes financeiros
             </div>
-            <h1 className="mt-4 text-3xl font-semibold text-slate-950">
+            <h1 className="mt-4 app-title">
               Gastos fixos
             </h1>
-            <p className="mt-2 max-w-xl text-base leading-7 text-slate-600">
+            <p className="app-subtitle mt-2 max-w-xl">
               Controle cobranças recorrentes como internet, academia,
               assinaturas e celular.
             </p>
           </div>
           <LogoutButton />
+          </div>
         </header>
 
         {error ? (
-          <section className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          <section className="alert-danger p-4 text-sm">
             {error}
           </section>
         ) : null}
 
         {data ? (
           <>
-            <section className="rounded-lg border border-blue-100 bg-white p-4 shadow-sm shadow-blue-100/70">
+            <section className="premium-panel p-4">
               <div className="grid gap-4 lg:grid-cols-3">
                 <div className="flex items-start gap-3">
                   <span
@@ -138,7 +140,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                     <CreditCard size={20} />
                   </span>
                   <div>
-                    <h2 className="text-base font-semibold text-slate-950">
+                    <h2 className="text-base font-bold text-[var(--app-ink)]">
                       Cartões manuais
                     </h2>
                     <p className="mt-1 text-sm leading-6 text-slate-500">
@@ -147,7 +149,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                   </div>
                   <Link
                     href="/cartoes"
-                    className="ml-auto hidden min-h-10 items-center justify-center rounded-full bg-slate-950 px-4 text-sm font-semibold text-white transition hover:bg-slate-800 sm:inline-flex"
+                    className="btn-primary ml-auto hidden min-h-10 sm:inline-flex"
                   >
                     Abrir cartões
                   </Link>
@@ -161,7 +163,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                     <Layers3 size={20} />
                   </span>
                   <div>
-                    <h2 className="text-base font-semibold text-slate-950">
+                    <h2 className="text-base font-bold text-[var(--app-ink)]">
                       Categorias
                     </h2>
                     <p className="mt-1 text-sm leading-6 text-slate-500">
@@ -170,7 +172,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                   </div>
                   <Link
                     href="/categorias"
-                    className="ml-auto hidden min-h-10 items-center justify-center rounded-full bg-slate-950 px-4 text-sm font-semibold text-white transition hover:bg-slate-800 sm:inline-flex"
+                    className="btn-primary ml-auto hidden min-h-10 sm:inline-flex"
                   >
                     Abrir categorias
                   </Link>
@@ -178,13 +180,13 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                 <div className="grid gap-2 sm:hidden">
                   <Link
                     href="/cartoes"
-                    className="inline-flex min-h-10 items-center justify-center rounded-full bg-slate-950 px-4 text-sm font-semibold text-white transition hover:bg-slate-800"
+                    className="btn-primary min-h-10"
                   >
                     Abrir cartões
                   </Link>
                   <Link
                     href="/categorias"
-                    className="inline-flex min-h-10 items-center justify-center rounded-full bg-slate-950 px-4 text-sm font-semibold text-white transition hover:bg-slate-800"
+                    className="btn-primary min-h-10"
                   >
                     Abrir categorias
                   </Link>
@@ -197,7 +199,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                     <BarChart3 size={20} />
                   </span>
                   <div>
-                    <h2 className="text-base font-semibold text-slate-950">
+                    <h2 className="text-base font-bold text-[var(--app-ink)]">
                       Relatórios
                     </h2>
                     <p className="mt-1 text-sm leading-6 text-slate-500">
@@ -206,14 +208,14 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                   </div>
                   <Link
                     href="/relatorios"
-                    className="ml-auto hidden min-h-10 items-center justify-center rounded-full bg-slate-950 px-4 text-sm font-semibold text-white transition hover:bg-slate-800 sm:inline-flex"
+                    className="btn-primary ml-auto hidden min-h-10 sm:inline-flex"
                   >
                     Abrir relatórios
                   </Link>
                 </div>
                 <Link
                   href="/relatorios"
-                  className="inline-flex min-h-10 items-center justify-center rounded-full bg-slate-950 px-4 text-sm font-semibold text-white transition hover:bg-slate-800 sm:hidden"
+                  className="btn-primary min-h-10 sm:hidden"
                 >
                   Abrir relatórios
                 </Link>
@@ -221,47 +223,47 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
             </section>
 
             <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/70">
-                <p className="text-sm font-medium text-slate-500">
+              <article className="app-card p-4">
+                <p className="text-sm font-semibold text-[var(--app-ink-muted)]">
                   Total ativo mensal
                 </p>
-                <strong className="mt-2 block text-2xl font-semibold text-slate-950">
+                <strong className="mt-2 block text-2xl font-bold text-[var(--app-ink)]">
                   {formatCurrency(data.summary.activeMonthlyTotal)}
                 </strong>
               </article>
 
-              <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/70">
-                <p className="text-sm font-medium text-slate-500">
+              <article className="app-card p-4">
+                <p className="text-sm font-semibold text-[var(--app-ink-muted)]">
                   Próximos vencimentos
                 </p>
-                <strong className="mt-2 block text-2xl font-semibold text-slate-950">
+                <strong className="mt-2 block text-2xl font-bold text-[var(--app-ink)]">
                   {formatCurrency(data.summary.pendingTotal)}
                 </strong>
-                <p className="mt-2 text-sm text-slate-500">
+                <p className="mt-2 text-sm text-[var(--app-ink-muted)]">
                   {data.summary.pendingCount} item(ns) pendente(s)
                 </p>
               </article>
 
-              <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/70">
-                <p className="text-sm font-medium text-slate-500">
+              <article className="app-card p-4">
+                <p className="text-sm font-semibold text-[var(--app-ink-muted)]">
                   Vencidos no mês
                 </p>
-                <strong className="mt-2 block text-2xl font-semibold text-slate-950">
+                <strong className="mt-2 block text-2xl font-bold text-[var(--app-ink)]">
                   {formatCurrency(data.summary.overdueTotal)}
                 </strong>
-                <p className="mt-2 text-sm text-slate-500">
+                <p className="mt-2 text-sm text-[var(--app-ink-muted)]">
                   {data.summary.overdueCount} item(ns) já passaram
                 </p>
               </article>
 
-              <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/70">
-                <p className="text-sm font-medium text-slate-500">
+              <article className="app-card p-4">
+                <p className="text-sm font-semibold text-[var(--app-ink-muted)]">
                   Pagos no mês
                 </p>
-                <strong className="mt-2 block text-2xl font-semibold text-slate-950">
+                <strong className="mt-2 block text-2xl font-bold text-[var(--app-ink)]">
                   {formatCurrency(data.summary.paidTotal)}
                 </strong>
-                <p className="mt-2 text-sm text-slate-500">
+                <p className="mt-2 text-sm text-[var(--app-ink-muted)]">
                   {data.summary.paidCount} item(ns) confirmado(s)
                 </p>
               </article>
@@ -270,16 +272,16 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
             <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
               <section>
                 <div className="mb-3">
-                  <h2 className="text-base font-semibold text-slate-950">
+                  <h2 className="text-base font-bold text-[var(--app-ink)]">
                     {isEditing ? "Editar gasto fixo" : "Novo gasto fixo"}
                   </h2>
-                  <p className="mt-1 text-sm text-slate-500">
+                  <p className="mt-1 text-sm text-[var(--app-ink-muted)]">
                     Mantenha a lista enxuta para a dashboard ficar precisa.
                   </p>
                 </div>
 
                 {isEditing && !editableExpense ? (
-                  <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                  <div className="alert-warning p-4 text-sm">
                     Gasto fixo não encontrado para edição.
                   </div>
                 ) : (
@@ -292,17 +294,17 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
 
               <section className="space-y-3">
                 <div>
-                  <h2 className="text-base font-semibold text-slate-950">
+                  <h2 className="text-base font-bold text-[var(--app-ink)]">
                     Recorrências cadastradas
                   </h2>
-                  <p className="mt-1 text-sm text-slate-500">
+                  <p className="mt-1 text-sm text-[var(--app-ink-muted)]">
                     Ativos e inativos aparecem juntos para facilitar ajustes.
                   </p>
                 </div>
 
                 {data.expenses.length === 0 ? (
-                  <div className="rounded-lg border border-slate-200 bg-white p-6 text-center shadow-sm shadow-slate-200/70">
-                    <h3 className="text-base font-semibold text-slate-950">
+                  <div className="app-card p-6 text-center">
+                    <h3 className="text-base font-bold text-[var(--app-ink)]">
                       Nenhum gasto fixo cadastrado
                     </h3>
                     <p className="mt-2 text-sm leading-6 text-slate-500">
@@ -315,7 +317,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                 {data.expenses.map((expense) => (
                   <article
                     key={expense.id}
-                    className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/70"
+                    className="app-card p-4"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
@@ -331,12 +333,12 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                             {expense.description}
                           </h3>
                         </div>
-                        <p className="mt-1 text-xs text-slate-500">
+                        <p className="mt-1 text-xs text-[var(--app-ink-muted)]">
                           {expense.categoryName} •{" "}
                           {paymentMethodLabels[expense.paymentMethod]}
                           {expense.cardName ? ` • ${expense.cardName}` : ""}
                         </p>
-                        <p className="mt-1 text-xs text-slate-500">
+                        <p className="mt-1 text-xs text-[var(--app-ink-muted)]">
                           Vence dia {expense.dueDay}
                         </p>
                         {expense.paidAt ? (
@@ -350,7 +352,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                               : ""}
                           </p>
                         ) : expense.latestPaidAt ? (
-                          <p className="mt-1 text-xs text-slate-500">
+                          <p className="mt-1 text-xs text-[var(--app-ink-muted)]">
                             Último pagamento em{" "}
                             {new Intl.DateTimeFormat("pt-BR").format(
                               new Date(`${expense.latestPaidAt}T00:00:00`),
@@ -360,7 +362,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                       </div>
 
                       <div className="shrink-0 text-right">
-                        <strong className="block text-base font-semibold text-slate-950">
+                        <strong className="block text-base font-bold text-[var(--app-ink)]">
                           {formatCurrency(expense.amount)}
                         </strong>
                         <span
@@ -392,7 +394,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
 
                       <Link
                         href={`/ajustes?editar=${expense.id}`}
-                        className="flex size-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-slate-50 hover:text-slate-950"
+                        className="icon-button size-9"
                         aria-label="Editar gasto fixo"
                       >
                         <Edit3 size={17} aria-hidden="true" />
@@ -407,7 +409,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                         />
                         <button
                           type="submit"
-                          className="flex size-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-slate-50 hover:text-slate-950"
+                          className="icon-button size-9"
                           aria-label={
                             expense.active
                               ? "Desativar gasto fixo"
@@ -426,7 +428,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                         <input type="hidden" name="id" value={expense.id} />
                         <button
                           type="submit"
-                          className="flex size-9 items-center justify-center rounded-lg border border-red-100 text-red-500 transition hover:bg-red-50"
+                          className="btn-danger size-9"
                           aria-label="Excluir gasto fixo"
                         >
                           <Trash2 size={17} aria-hidden="true" />
@@ -444,3 +446,5 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
     </div>
   );
 }
+
+
