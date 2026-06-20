@@ -53,7 +53,7 @@ export default async function Home() {
 
   return (
     <div className="app-shell">
-      <main className="mx-auto flex w-full max-w-6xl flex-col gap-7 px-4 py-4 sm:px-6 md:py-7 lg:px-8">
+      <main className="mx-auto flex w-full max-w-6xl flex-col gap-7 px-5 py-4 sm:px-6 md:py-7 lg:px-8">
         {error ? (
           <section className="alert-danger p-4 text-sm leading-6">{error}</section>
         ) : null}
