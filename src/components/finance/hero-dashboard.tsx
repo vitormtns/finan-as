@@ -34,25 +34,19 @@ function getCashFlowStatus(dashboard: MonthlyDashboard) {
     return { label: "Há contas vencidas", tone: "warning" as const };
   }
 
-  if (dashboard.remainingFixedExpensesTotal === 0) {
-    return { label: "Contas fixas em dia", tone: "success" as const };
+  if (dashboard.outstandingBillsTotal === 0) {
+    return { label: "Nenhuma conta pendente", tone: "success" as const };
   }
 
   return { label: "Fluxo do mês positivo", tone: "success" as const };
 }
 
 function getCashFlowMessage(dashboard: MonthlyDashboard) {
-  if (dashboard.remainingFixedExpensesTotal === 0) {
-    return "Nenhuma conta fixa está pendente neste mês. O saldo considera tudo o que entrou e já foi registrado.";
+  if (dashboard.outstandingBillsTotal === 0) {
+    return "Nenhuma conta está pendente. O saldo considera o que entrou e os pagamentos já realizados.";
   }
 
-  const balance = Math.abs(dashboard.balanceAfterCommitments);
-
-  if (dashboard.balanceAfterCommitments < 0) {
-    return `Depois dos gastos e das contas pendentes, ainda faltam ${formatCurrency(balance)} para fechar o mês.`;
-  }
-
-  return `Depois dos gastos e das contas pendentes, a previsão é sobrar ${formatCurrency(balance)} neste mês.`;
+  return `São ${formatCurrency(dashboard.remainingFixedExpensesTotal)} em contas fixas e ${formatCurrency(dashboard.cardInvoicesTotal)} nas faturas atual e próxima.`;
 }
 
 function getCashFlowInsight(dashboard: MonthlyDashboard) {
@@ -71,16 +65,16 @@ function getCashFlowInsight(dashboard: MonthlyDashboard) {
     };
   }
 
-  if (dashboard.remainingFixedExpensesTotal === 0) {
+  if (dashboard.outstandingBillsTotal === 0) {
     return {
-      title: "As contas previstas estão em dia",
-      message: `Depois do que já foi gasto, seu saldo atual é ${formatCurrency(dashboard.balanceAfterExpenses)}.`,
+      title: "Não há mais contas a pagar",
+      message: `Depois dos pagamentos realizados, seu saldo atual é ${formatCurrency(dashboard.balanceAfterExpenses)}.`,
     };
   }
 
   return {
     title: "As contas previstas cabem nas entradas",
-    message: `${formatCurrency(dashboard.remainingFixedExpensesTotal)} ainda estão reservados para contas fixas deste mês.`,
+    message: `Depois de pagar tudo, a previsão é ficar com ${formatCurrency(dashboard.balanceAfterCommitments)}.`,
   };
 }
 
@@ -89,7 +83,6 @@ export function HeroDashboard({
   dashboard,
 }: HeroDashboardProps) {
   const status = getCashFlowStatus(dashboard);
-  const balanceIsPositive = dashboard.balanceAfterCommitments >= 0;
   const commitmentPercentage =
     dashboard.totalIncome > 0
       ? Math.round((dashboard.totalCommitted / dashboard.totalIncome) * 100)
@@ -117,10 +110,10 @@ export function HeroDashboard({
 
           <div className="max-w-2xl">
             <p className="text-sm font-semibold text-white/58">
-              Ainda falta pagar
+              Contas a pagar
             </p>
             <h1 className="mt-3 text-[clamp(3.25rem,12vw,6.6rem)] font-bold leading-[0.86] tracking-[-0.075em] text-white">
-              {formatCurrency(dashboard.remainingFixedExpensesTotal)}
+              {formatCurrency(dashboard.outstandingBillsTotal)}
             </h1>
             <p className="mt-6 max-w-xl text-sm leading-6 text-white/65 sm:text-base sm:leading-7">
               {getCashFlowMessage(dashboard)}
@@ -138,18 +131,18 @@ export function HeroDashboard({
             </div>
             <div>
               <p className="text-[0.65rem] font-bold uppercase tracking-[0.08em] text-white/42 sm:text-xs">
-                Já gastou
+                Já saiu
               </p>
               <strong className="mt-2 block text-sm font-bold sm:text-lg">
-                {formatCurrency(dashboard.totalExpenses)}
+                {formatCurrency(dashboard.paidExpensesTotal)}
               </strong>
             </div>
             <div>
               <p className="text-[0.65rem] font-bold uppercase tracking-[0.08em] text-white/42 sm:text-xs">
-                {balanceIsPositive ? "Sobra prevista" : "Falta cobrir"}
+                Saldo depois de tudo
               </p>
               <strong className="mt-2 block text-sm font-bold sm:text-lg">
-                {formatCurrency(Math.abs(dashboard.balanceAfterCommitments))}
+                {formatCurrency(dashboard.balanceAfterCommitments)}
               </strong>
             </div>
           </div>
@@ -199,22 +192,38 @@ export function HeroDashboard({
             )}
           </span>
           <p className="mt-5 text-sm font-bold text-[var(--app-ink)]">
-            {dashboard.overdueFixedExpensesTotal > 0
-              ? "Contas vencidas"
-              : "Contas fixas pendentes"}
+            O que compõe esse valor
           </p>
-          <strong className="mt-1 block text-3xl font-bold tracking-[-0.045em] text-[var(--app-ink)]">
-            {dashboard.overdueFixedExpensesTotal > 0
-              ? formatCurrency(dashboard.overdueFixedExpensesTotal)
-              : `${dashboard.remainingFixedExpenses.length} conta${dashboard.remainingFixedExpenses.length === 1 ? "" : "s"}`}
-          </strong>
-          <Link
-            href="/ajustes"
-            className="mt-5 inline-flex items-center gap-2 text-sm font-extrabold text-[var(--app-accent)]"
-          >
-            Conferir contas fixas
-            <ArrowRight size={16} aria-hidden="true" />
-          </Link>
+          <div className="mt-3 divide-y divide-[var(--app-border)]">
+            <div className="flex items-center justify-between gap-3 py-3">
+              <span className="text-sm text-[var(--app-ink-muted)]">Contas fixas</span>
+              <strong className="text-sm font-extrabold text-[var(--app-ink)]">
+                {formatCurrency(dashboard.remainingFixedExpensesTotal)}
+              </strong>
+            </div>
+            <div className="flex items-center justify-between gap-3 py-3">
+              <span className="text-sm text-[var(--app-ink-muted)]">Faturas de cartão</span>
+              <strong className="text-sm font-extrabold text-[var(--app-ink)]">
+                {formatCurrency(dashboard.cardInvoicesTotal)}
+              </strong>
+            </div>
+          </div>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <Link
+              href="/ajustes"
+              className="inline-flex items-center gap-1 text-sm font-extrabold text-[var(--app-accent)]"
+            >
+              Contas fixas
+              <ArrowRight size={15} aria-hidden="true" />
+            </Link>
+            <Link
+              href="/cartoes"
+              className="inline-flex items-center gap-1 text-sm font-extrabold text-[var(--app-accent)]"
+            >
+              Cartões
+              <ArrowRight size={15} aria-hidden="true" />
+            </Link>
+          </div>
         </article>
       </div>
     </section>

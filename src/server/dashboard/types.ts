@@ -48,6 +48,9 @@ export type MonthlyDashboard = {
   remainingDays: number;
   totalExpenses: number;
   totalIncome: number;
+  paidExpensesTotal: number;
+  cardInvoicesTotal: number;
+  outstandingBillsTotal: number;
   balanceAfterExpenses: number;
   totalCommitted: number;
   balanceAfterCommitments: number;

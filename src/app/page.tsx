@@ -182,18 +182,18 @@ export default async function Home() {
                   <span className="metric-card-icon bg-[var(--app-accent-soft)] text-[var(--app-accent)]">
                     <Landmark size={18} aria-hidden="true" />
                   </span>
-                  <p>Saldo depois dos gastos</p>
-                  <strong>{formatCurrency(dashboard.balanceAfterExpenses)}</strong>
-                  <small>O que entrou menos tudo que já foi registrado.</small>
+                  <p>Já saiu</p>
+                  <strong>{formatCurrency(dashboard.paidExpensesTotal)}</strong>
+                  <small>Pagamentos em Pix, débito, dinheiro e outras formas imediatas.</small>
                 </article>
 
                 <article className="metric-card">
                   <span className="metric-card-icon bg-[var(--app-primary-soft)] text-[var(--app-primary)]">
                     <TrendingUp size={18} aria-hidden="true" />
                   </span>
-                  <p>Total comprometido</p>
-                  <strong>{formatCurrency(dashboard.totalCommitted)}</strong>
-                  <small>Gastos registrados mais contas fixas pendentes.</small>
+                  <p>Contas a pagar</p>
+                  <strong>{formatCurrency(dashboard.outstandingBillsTotal)}</strong>
+                  <small>Contas fixas mais as faturas atual e próxima dos cartões.</small>
                 </article>
 
                 <article className="metric-card">

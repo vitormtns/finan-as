@@ -1,7 +1,8 @@
 export type MonthlyCashFlowInput = {
   totalIncome: number;
-  totalExpenses: number;
+  paidExpensesTotal: number;
   remainingFixedExpensesTotal: number;
+  cardInvoicesTotal: number;
 };
 
 function roundMoney(value: number) {
@@ -10,10 +11,13 @@ function roundMoney(value: number) {
 
 export function calculateMonthlyCashFlow(input: MonthlyCashFlowInput) {
   const balanceAfterExpenses = roundMoney(
-    input.totalIncome - input.totalExpenses,
+    input.totalIncome - input.paidExpensesTotal,
+  );
+  const outstandingBillsTotal = roundMoney(
+    input.remainingFixedExpensesTotal + input.cardInvoicesTotal,
   );
   const totalCommitted = roundMoney(
-    input.totalExpenses + input.remainingFixedExpensesTotal,
+    input.paidExpensesTotal + outstandingBillsTotal,
   );
   const balanceAfterCommitments = roundMoney(
     input.totalIncome - totalCommitted,
@@ -21,6 +25,7 @@ export function calculateMonthlyCashFlow(input: MonthlyCashFlowInput) {
 
   return {
     balanceAfterExpenses,
+    outstandingBillsTotal,
     totalCommitted,
     balanceAfterCommitments,
   };

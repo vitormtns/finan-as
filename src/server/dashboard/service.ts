@@ -1,6 +1,7 @@
-import { TransactionType } from "@prisma/client";
+import { PaymentMethod, TransactionType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency } from "@/lib/formatters";
+import { getCardsPageData } from "@/server/cards/service";
 import { getFutureFixedExpensesForMonth } from "@/server/fixed-expenses/service";
 import { calculateMonthlyCashFlow } from "./cash-flow";
 import type {
@@ -290,6 +291,7 @@ export async function getMonthlyDashboard(
     budget,
     futureFixedExpenses,
     weeklyTransactions,
+    cardsPageData,
   ] = await Promise.all([
     prisma.transaction.findMany({
       where: {
@@ -341,6 +343,7 @@ export async function getMonthlyDashboard(
         },
       },
     }),
+    getCardsPageData(userId, undefined, date),
   ]);
 
   const expenseTransactions = transactions.filter(
@@ -348,6 +351,9 @@ export async function getMonthlyDashboard(
   );
   const incomeTransactions = transactions.filter(
     (transaction) => transaction.type === TransactionType.INCOME,
+  );
+  const paidExpenseTransactions = expenseTransactions.filter(
+    (transaction) => transaction.paymentMethod !== PaymentMethod.CREDIT,
   );
 
   const totalExpenses = roundMoney(
@@ -358,6 +364,12 @@ export async function getMonthlyDashboard(
   );
   const totalIncome = roundMoney(
     incomeTransactions.reduce(
+      (sum, transaction) => sum + decimalToNumber(transaction.amount),
+      0,
+    ),
+  );
+  const paidExpensesTotal = roundMoney(
+    paidExpenseTransactions.reduce(
       (sum, transaction) => sum + decimalToNumber(transaction.amount),
       0,
     ),
@@ -404,14 +416,23 @@ export async function getMonthlyDashboard(
   const remainingFixedExpenses = futureFixedExpenses.expenses;
   const remainingFixedExpensesTotal = futureFixedExpenses.total;
   const overdueFixedExpensesTotal = futureFixedExpenses.overdueTotal;
+  const cardInvoicesTotal = roundMoney(
+    cardsPageData.cards.reduce(
+      (sum, card) =>
+        sum + card.currentInvoiceTotal + card.nextInvoiceTotal,
+      0,
+    ),
+  );
   const {
     balanceAfterExpenses,
+    outstandingBillsTotal,
     totalCommitted,
     balanceAfterCommitments,
   } = calculateMonthlyCashFlow({
     totalIncome,
-    totalExpenses,
+    paidExpensesTotal,
     remainingFixedExpensesTotal,
+    cardInvoicesTotal,
   });
   const availableRealAmount =
     budgetLimit === null
@@ -468,6 +489,9 @@ export async function getMonthlyDashboard(
     remainingDays: reference.remainingDays,
     totalExpenses,
     totalIncome,
+    paidExpensesTotal,
+    cardInvoicesTotal,
+    outstandingBillsTotal,
     balanceAfterExpenses,
     totalCommitted,
     balanceAfterCommitments,
