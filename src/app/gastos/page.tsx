@@ -78,10 +78,9 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
                 <ReceiptText size={16} aria-hidden="true" />
                 {formatMonth(new Date(year, month - 1, 1))}
               </span>
-              <h1 className="mt-5 app-title">Gastos</h1>
+              <h1 className="mt-5 app-title">Movimentos</h1>
               <p className="app-subtitle mt-2 max-w-xl">
-                Movimentações organizadas por mês, com ações rápidas para manter
-                o controle no ritmo do dia a dia.
+                Entradas e saídas em uma linha do tempo simples de revisar.
               </p>
             </div>
 
@@ -95,7 +94,7 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
               <Link href="/novo" className="mt-5 flex min-h-12 items-center justify-between rounded-2xl bg-white px-4 text-sm font-bold text-[var(--app-primary)]">
                 <span className="inline-flex items-center gap-2">
                   <Plus size={18} aria-hidden="true" />
-                  Novo gasto
+                  Nova movimentação
                 </span>
                 <span aria-hidden="true">+</span>
               </Link>
@@ -107,7 +106,7 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
           <form className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
             <div>
               <label className="form-label" htmlFor="mes">
-                Filtrar por mês
+                Selecionar mês
               </label>
               <input
                 id="mes"
@@ -130,13 +129,13 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
         {!error && transactions.length === 0 ? (
           <section className="rounded-[1.65rem] border border-dashed border-[var(--app-border-strong)] bg-white/64 p-8 text-center shadow-[0_18px_48px_rgb(16_25_35_/_0.08)] backdrop-blur">
             <h2 className="text-lg font-bold text-[var(--app-ink)]">
-              Nenhum gasto neste mês
+              Nenhuma movimentação neste mês
             </h2>
             <p className="mt-2 text-sm leading-6 text-[var(--app-ink-muted)]">
-              Cadastre o primeiro gasto para acompanhar melhor o ritmo do mês.
+              Registre uma despesa ou receita para começar a acompanhar o mês.
             </p>
             <Link href="/novo" className="btn-primary mt-5">
-              Salvar gasto
+              Registrar movimentação
             </Link>
           </section>
         ) : null}

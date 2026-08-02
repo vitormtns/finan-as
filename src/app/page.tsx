@@ -1,17 +1,16 @@
 import Link from "next/link";
 import {
+  ArrowDownLeft,
   ArrowRight,
-  CalendarDays,
-  PiggyBank,
-  TrendingDown,
+  ArrowUpRight,
+  CreditCard,
+  Landmark,
+  ListChecks,
+  Plus,
   TrendingUp,
-  WalletCards,
 } from "lucide-react";
 import { AlertsList } from "@/components/finance/alerts-list";
 import { CategoryList } from "@/components/finance/category-list";
-import { DailySpendingCard } from "@/components/finance/daily-spending-card";
-import { FinanceMetricGrid } from "@/components/finance/finance-metric-grid";
-import { FinancialSummaryCard } from "@/components/finance/financial-summary-card";
 import { FixedExpensesCard } from "@/components/finance/fixed-expenses-card";
 import { HeroDashboard } from "@/components/finance/hero-dashboard";
 import { MobileNavigation } from "@/components/finance/mobile-navigation";
@@ -40,7 +39,7 @@ async function loadDashboard() {
       dashboard: null,
       alerts: [],
       error:
-        "Não foi possível carregar a dashboard. Verifique a conexão com o banco de dados.",
+        "Não foi possível carregar sua visão financeira. Verifique a conexão e tente novamente.",
     };
   }
 }
@@ -48,12 +47,29 @@ async function loadDashboard() {
 export default async function Home() {
   const { dashboard, alerts, error } = await loadDashboard();
   const currentMonth = formatMonth(new Date());
-  const mainAlert = alerts[0];
-  const secondaryAlerts = alerts.slice(1, 4);
+  const secondaryAlerts = alerts.slice(0, 3);
 
   return (
     <div className="app-shell">
-      <main className="mx-auto flex w-full max-w-6xl flex-col gap-7 px-5 py-4 sm:px-6 md:py-7 lg:px-8">
+      <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-5 sm:px-6 md:py-8 lg:px-8">
+        <header className="flex items-center justify-between md:hidden">
+          <div>
+            <p className="text-xs font-extrabold uppercase tracking-[0.1em] text-[var(--app-ink-faint)]">
+              Meu Mês
+            </p>
+            <h1 className="mt-1 text-2xl font-extrabold tracking-[-0.04em] text-[var(--app-ink)]">
+              Visão geral
+            </h1>
+          </div>
+          <Link
+            href="/novo?tipo=despesa"
+            className="flex size-11 items-center justify-center rounded-2xl bg-[var(--app-primary)] text-white shadow-[0_10px_24px_rgb(20_23_21_/_0.2)]"
+            aria-label="Registrar movimentação"
+          >
+            <Plus size={21} aria-hidden="true" />
+          </Link>
+        </header>
+
         {error ? (
           <section className="alert-danger p-4 text-sm leading-6">{error}</section>
         ) : null}
@@ -63,172 +79,203 @@ export default async function Home() {
             <HeroDashboard
               currentMonth={currentMonth}
               dashboard={dashboard}
-              mainAlert={mainAlert}
             />
 
+            <section aria-labelledby="acoes-rapidas">
+              <div className="mb-4 flex items-end justify-between gap-4">
+                <div>
+                  <p className="section-eyebrow">Todos os dias</p>
+                  <h2 id="acoes-rapidas" className="section-title mt-1">
+                    Ações rápidas
+                  </h2>
+                </div>
+                <Link
+                  href="/gastos"
+                  className="hidden items-center gap-1 text-sm font-extrabold text-[var(--app-ink-muted)] sm:inline-flex"
+                >
+                  Ver tudo
+                  <ArrowRight size={16} aria-hidden="true" />
+                </Link>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <Link
+                  href="/novo?tipo=despesa"
+                  className="quick-action group"
+                >
+                  <span className="quick-action-icon bg-[#fff0ed] text-[#a54535]">
+                    <ArrowUpRight size={20} aria-hidden="true" />
+                  </span>
+                  <span>
+                    <strong>Registrar despesa</strong>
+                    <small>O que saiu agora</small>
+                  </span>
+                  <ArrowRight className="ml-auto text-[var(--app-ink-faint)] transition group-hover:translate-x-1" size={18} aria-hidden="true" />
+                </Link>
+
+                <Link
+                  href="/novo?tipo=receita"
+                  className="quick-action group"
+                >
+                  <span className="quick-action-icon bg-[var(--app-accent-soft)] text-[var(--app-accent)]">
+                    <ArrowDownLeft size={20} aria-hidden="true" />
+                  </span>
+                  <span>
+                    <strong>Registrar receita</strong>
+                    <small>O que entrou hoje</small>
+                  </span>
+                  <ArrowRight className="ml-auto text-[var(--app-ink-faint)] transition group-hover:translate-x-1" size={18} aria-hidden="true" />
+                </Link>
+
+                <Link href="/gastos" className="quick-action group">
+                  <span className="quick-action-icon bg-[var(--app-primary-soft)] text-[var(--app-primary)]">
+                    <ListChecks size={20} aria-hidden="true" />
+                  </span>
+                  <span>
+                    <strong>Ver movimentos</strong>
+                    <small>Revisar e corrigir</small>
+                  </span>
+                  <ArrowRight className="ml-auto text-[var(--app-ink-faint)] transition group-hover:translate-x-1" size={18} aria-hidden="true" />
+                </Link>
+
+                <Link href="/cartoes" className="quick-action group">
+                  <span className="quick-action-icon bg-[#e7e6ff] text-[#5148a8]">
+                    <CreditCard size={20} aria-hidden="true" />
+                  </span>
+                  <span>
+                    <strong>Gerenciar cartões</strong>
+                    <small>Faturas e compras</small>
+                  </span>
+                  <ArrowRight className="ml-auto text-[var(--app-ink-faint)] transition group-hover:translate-x-1" size={18} aria-hidden="true" />
+                </Link>
+              </div>
+            </section>
+
             {dashboard.budgetLimit === null ? (
-              <section className="rounded-[1.5rem] border border-dashed border-[var(--app-border-strong)] bg-white/60 p-5 shadow-[0_18px_42px_rgb(16_25_35_/_0.08)] backdrop-blur">
-                <h2 className="text-base font-bold text-[var(--app-ink)]">
-                  Meta mensal não configurada
-                </h2>
-                <p className="mt-2 text-sm leading-6 text-[var(--app-ink-muted)]">
-                  Cadastre um orçamento para calcular valor disponível, limite
-                  seguro por dia e comparação com a projeção do mês.
-                </p>
-                <Link href="/metas" className="btn-primary mt-4">
-                  Configurar meta
+              <section className="flex flex-col gap-4 rounded-[1.75rem] border border-dashed border-[var(--app-border-strong)] bg-white/55 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+                <div>
+                  <p className="section-eyebrow">Falta só uma informação</p>
+                  <h2 className="mt-2 text-xl font-extrabold tracking-[-0.03em] text-[var(--app-ink)]">
+                    Defina quanto pretende gastar no mês
+                  </h2>
+                  <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--app-ink-muted)]">
+                    Com uma meta, o aplicativo calcula automaticamente seu valor livre por dia e antecipa desvios.
+                  </p>
+                </div>
+                <Link href="/metas" className="btn-primary shrink-0">
+                  Criar planejamento
                   <ArrowRight size={16} aria-hidden="true" />
                 </Link>
               </section>
             ) : null}
 
-            <FinanceMetricGrid
-              metrics={[
-                {
-                  title: "Total gasto",
-                  value: formatCurrency(dashboard.totalExpenses),
-                  description: "Tudo que saiu neste mês, já somado para leitura rápida.",
-                  icon: WalletCards,
-                  tone: "ink",
-                  featured: true,
-                },
-                {
-                  title: "Receitas",
-                  value: formatCurrency(dashboard.totalIncome),
-                  description: "Entradas registradas no mês.",
-                  icon: TrendingUp,
-                  tone: "emerald",
-                },
-                {
-                  title: "Meta mensal",
-                  value:
-                    dashboard.budgetLimit === null
-                      ? "Não definida"
-                      : formatCurrency(dashboard.budgetLimit),
-                  description: "Seu limite planejado.",
-                  icon: PiggyBank,
-                  tone: dashboard.budgetLimit === null ? "warm" : "muted",
-                },
-              ]}
-            />
+            <section aria-labelledby="pulso-do-mes">
+              <div className="mb-4">
+                <p className="section-eyebrow">Entradas, saídas e compromissos</p>
+                <h2 id="pulso-do-mes" className="section-title mt-1">
+                  Pulso do mês
+                </h2>
+              </div>
 
-            <section className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
-              <DailySpendingCard
-                allowance={dashboard.dailySpendingAllowance}
-                remainingFixedExpensesTotal={dashboard.remainingFixedExpensesTotal}
-                remainingDays={dashboard.remainingDays}
-              />
+              <div className="grid gap-3 sm:grid-cols-3">
+                <article className="metric-card">
+                  <span className="metric-card-icon bg-[var(--app-accent-soft)] text-[var(--app-accent)]">
+                    <Landmark size={18} aria-hidden="true" />
+                  </span>
+                  <p>Saldo depois dos gastos</p>
+                  <strong>{formatCurrency(dashboard.balanceAfterExpenses)}</strong>
+                  <small>O que entrou menos tudo que já foi registrado.</small>
+                </article>
+
+                <article className="metric-card">
+                  <span className="metric-card-icon bg-[var(--app-primary-soft)] text-[var(--app-primary)]">
+                    <TrendingUp size={18} aria-hidden="true" />
+                  </span>
+                  <p>Total comprometido</p>
+                  <strong>{formatCurrency(dashboard.totalCommitted)}</strong>
+                  <small>Gastos registrados mais contas fixas pendentes.</small>
+                </article>
+
+                <article className="metric-card">
+                  <span className="metric-card-icon bg-[#fff3d6] text-[#87600b]">
+                    <ArrowDownLeft size={18} aria-hidden="true" />
+                  </span>
+                  <p>Saldo depois das contas</p>
+                  <strong>{formatCurrency(dashboard.balanceAfterCommitments)}</strong>
+                  <small>Quanto deve sobrar após os compromissos pendentes.</small>
+                </article>
+              </div>
+            </section>
+
+            <section className="grid gap-5 lg:grid-cols-[1.05fr_0.95fr]">
               <WeeklySummaryCard summary={dashboard.weeklySummary} />
-            </section>
-
-            <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              <FinancialSummaryCard
-                title={
-                  dashboard.availableAmount !== null &&
-                  dashboard.availableAmount < 0
-                    ? "Acima da meta"
-                    : "Saldo da meta"
-                }
-                value={
-                  dashboard.availableAmount === null
-                    ? "Sem meta"
-                    : formatCurrency(Math.abs(dashboard.availableAmount))
-                }
-                description={
-                  dashboard.availableAmount !== null &&
-                  dashboard.availableAmount < 0
-                    ? "Valor acima do orçamento mensal."
-                    : "Margem antes dos fixos futuros."
-                }
-                icon={TrendingDown}
-                tone={
-                  dashboard.availableAmount !== null &&
-                  dashboard.availableAmount < 0
-                    ? "warning"
-                    : "success"
-                }
-              />
-              <FinancialSummaryCard
-                title="Fixos restantes"
-                value={formatCurrency(dashboard.remainingFixedExpensesTotal)}
-                description="Compromissos ainda pendentes."
-                icon={CalendarDays}
-                tone="neutral"
-              />
-              <FinancialSummaryCard
-                title="Projeção"
-                value={formatCurrency(dashboard.projectedMonthTotal)}
-                description="Fechamento estimado pelo ritmo atual."
-                icon={TrendingUp}
-                tone={
-                  dashboard.projectedBudgetDifference !== null &&
-                  dashboard.projectedBudgetDifference > 0
-                    ? "warning"
-                    : "success"
-                }
+              <MonthProjectionCard
+                dailyAverage={dashboard.dailyAverage}
+                projectedMonthTotal={dashboard.projectedMonthTotal}
+                projectedBudgetDifference={dashboard.projectedBudgetDifference}
               />
             </section>
 
-            <section className="grid gap-3 sm:grid-cols-2">
-              <FinancialSummaryCard
-                title="Maior categoria"
-                value={dashboard.largestCategory?.name ?? "Sem gastos"}
-                description={
-                  dashboard.largestCategory
-                    ? `${formatCurrency(dashboard.largestCategory.amount)} neste mês.`
-                    : "Nenhuma despesa lançada ainda."
-                }
-                icon={WalletCards}
-                tone="neutral"
-              />
-              <FinancialSummaryCard
-                title="Média diária"
-                value={formatCurrency(dashboard.dailyAverage)}
-                description="Ritmo médio dos lançamentos no mês."
-                icon={TrendingDown}
-                tone={
-                  dashboard.projectedBudgetDifference !== null &&
-                  dashboard.projectedBudgetDifference > 0
-                    ? "warning"
-                    : "success"
-                }
-              />
-            </section>
-
-            <div className="grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
-              <div className="space-y-6">
-                <CategoryList categories={dashboard.categoryExpenses} />
-                <FixedExpensesCard
-                  expenses={dashboard.remainingFixedExpenses}
-                  total={dashboard.remainingFixedExpensesTotal}
-                />
-              </div>
-
-              <div className="space-y-6">
-                {secondaryAlerts.length > 0 ? (
-                  <AlertsList alerts={secondaryAlerts} />
-                ) : null}
-
-                <MonthProjectionCard
-                  dailyAverage={dashboard.dailyAverage}
-                  projectedMonthTotal={dashboard.projectedMonthTotal}
-                  projectedBudgetDifference={dashboard.projectedBudgetDifference}
-                />
-
-                <section className="rounded-[1.5rem] border border-white/70 bg-white/70 p-5 shadow-[0_18px_48px_rgb(16_25_35_/_0.08)] backdrop-blur">
-                  <h2 className="text-base font-bold text-[var(--app-ink)]">
-                    Próxima ação
+            <section aria-labelledby="detalhes-do-mes">
+              <div className="mb-4 flex items-end justify-between gap-4">
+                <div>
+                  <p className="section-eyebrow">Quando quiser aprofundar</p>
+                  <h2 id="detalhes-do-mes" className="section-title mt-1">
+                    Detalhes do mês
                   </h2>
-                  <p className="mt-2 text-sm leading-6 text-[var(--app-ink-muted)]">
-                    Registre gastos assim que eles acontecerem para manter a
-                    projeção fiel ao seu mês.
-                  </p>
-                  <Link href="/alertas" className="btn-secondary mt-4 w-full">
-                    Ver todos os alertas
-                  </Link>
-                </section>
+                </div>
+                <Link
+                  href="/relatorios"
+                  className="inline-flex items-center gap-1 text-sm font-extrabold text-[var(--app-ink-muted)]"
+                >
+                  Relatórios
+                  <ArrowRight size={16} aria-hidden="true" />
+                </Link>
               </div>
-            </div>
+
+              <div className="grid gap-5 lg:grid-cols-[1.08fr_0.92fr]">
+                <div className="space-y-5">
+                  <CategoryList categories={dashboard.categoryExpenses} />
+                  <FixedExpensesCard
+                    expenses={dashboard.remainingFixedExpenses}
+                    total={dashboard.remainingFixedExpensesTotal}
+                  />
+                </div>
+
+                <div className="space-y-5">
+                  {secondaryAlerts.length > 0 ? (
+                    <AlertsList alerts={secondaryAlerts} />
+                  ) : (
+                    <section className="app-card p-5 sm:p-6">
+                      <p className="section-eyebrow">Insights</p>
+                      <h2 className="mt-2 text-lg font-extrabold text-[var(--app-ink)]">
+                        Nada urgente por aqui
+                      </h2>
+                      <p className="mt-2 text-sm leading-6 text-[var(--app-ink-muted)]">
+                        Continue registrando seus movimentos para manter as recomendações precisas.
+                      </p>
+                    </section>
+                  )}
+
+                  <Link
+                    href="/ajustes"
+                    className="group flex items-center justify-between rounded-[1.75rem] bg-[var(--app-primary)] p-5 text-white shadow-[0_20px_55px_rgb(20_23_21_/_0.17)] sm:p-6"
+                  >
+                    <span>
+                      <span className="block text-xs font-bold uppercase tracking-[0.08em] text-white/48">
+                        Automatize o cotidiano
+                      </span>
+                      <strong className="mt-2 block text-lg font-extrabold">
+                        Organizar gastos fixos
+                      </strong>
+                    </span>
+                    <span className="flex size-11 items-center justify-center rounded-full bg-white/10 transition group-hover:bg-white/16">
+                      <ArrowRight size={19} aria-hidden="true" />
+                    </span>
+                  </Link>
+                </div>
+              </div>
+            </section>
           </>
         ) : null}
       </main>

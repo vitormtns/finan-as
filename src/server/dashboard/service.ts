@@ -2,6 +2,7 @@ import { TransactionType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency } from "@/lib/formatters";
 import { getFutureFixedExpensesForMonth } from "@/server/fixed-expenses/service";
+import { calculateMonthlyCashFlow } from "./cash-flow";
 import type {
   DailySpendingAllowance,
   DashboardCategory,
@@ -403,6 +404,15 @@ export async function getMonthlyDashboard(
   const remainingFixedExpenses = futureFixedExpenses.expenses;
   const remainingFixedExpensesTotal = futureFixedExpenses.total;
   const overdueFixedExpensesTotal = futureFixedExpenses.overdueTotal;
+  const {
+    balanceAfterExpenses,
+    totalCommitted,
+    balanceAfterCommitments,
+  } = calculateMonthlyCashFlow({
+    totalIncome,
+    totalExpenses,
+    remainingFixedExpensesTotal,
+  });
   const availableRealAmount =
     budgetLimit === null
       ? null
@@ -458,6 +468,9 @@ export async function getMonthlyDashboard(
     remainingDays: reference.remainingDays,
     totalExpenses,
     totalIncome,
+    balanceAfterExpenses,
+    totalCommitted,
+    balanceAfterCommitments,
     budgetLimit,
     availableAmount,
     safeDailyLimit,

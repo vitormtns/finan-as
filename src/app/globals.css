@@ -1,26 +1,27 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f6f4ef;
-  --foreground: #101923;
-  --app-surface: #fffdf8;
-  --app-surface-muted: #f0eee7;
-  --app-border: #e4ded2;
-  --app-border-strong: #d6cdbc;
-  --app-ink: #101923;
-  --app-ink-muted: #5f6b76;
-  --app-primary: #0f2633;
-  --app-primary-soft: #e8eef0;
-  --app-accent: #047857;
-  --app-accent-soft: #e5f4ed;
-  --app-warning: #9a6a18;
-  --app-warning-soft: #fbf1dc;
-  --app-danger: #b42318;
-  --app-danger-soft: #fae7e4;
-  --app-shadow: 0 18px 45px rgb(16 25 35 / 0.08);
-  --app-shadow-soft: 0 10px 30px rgb(16 25 35 / 0.06);
-  --app-radius-card: 8px;
-  --app-radius-control: 8px;
+  --background: #f4f4f0;
+  --foreground: #171a18;
+  --app-surface: #ffffff;
+  --app-surface-muted: #ebece7;
+  --app-border: rgb(23 26 24 / 0.09);
+  --app-border-strong: rgb(23 26 24 / 0.18);
+  --app-ink: #171a18;
+  --app-ink-muted: #626863;
+  --app-ink-faint: #8c928d;
+  --app-primary: #181c19;
+  --app-primary-soft: #e7e9e5;
+  --app-accent: #2f7458;
+  --app-accent-soft: #dff1e7;
+  --app-warning: #8a6210;
+  --app-warning-soft: #fff1cf;
+  --app-danger: #a23e30;
+  --app-danger-soft: #ffebe7;
+  --app-shadow: 0 24px 70px rgb(24 28 25 / 0.1);
+  --app-shadow-soft: 0 12px 34px rgb(24 28 25 / 0.07);
+  --app-radius-card: 1.5rem;
+  --app-radius-control: 0.9rem;
   --app-space-page: clamp(1.25rem, 4vw, 2rem);
 }
 
@@ -37,6 +38,7 @@ body {
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
   overflow-x: hidden;
   -webkit-tap-highlight-color: transparent;
+  text-rendering: optimizeLegibility;
 }
 
 html {
@@ -71,30 +73,31 @@ textarea {
   .app-shell {
     min-height: 100vh;
     background:
-      radial-gradient(circle at 8% -12%, rgb(4 120 87 / 0.22), transparent 24rem),
-      radial-gradient(circle at 86% 2%, rgb(15 38 51 / 0.16), transparent 23rem),
-      radial-gradient(circle at 50% 44%, rgb(255 255 255 / 0.85), transparent 19rem),
-      linear-gradient(180deg, #fbfaf6 0%, var(--background) 44%, #ebe5da 100%);
+      radial-gradient(circle at 4% 0%, rgb(255 255 255 / 0.95), transparent 28rem),
+      radial-gradient(circle at 96% 12%, rgb(209 229 218 / 0.52), transparent 30rem),
+      var(--background);
     padding-bottom: 8.5rem;
   }
 
   @media (min-width: 768px) {
     .app-shell {
       padding-bottom: 0;
+      padding-top: 5.75rem;
     }
   }
 
   .app-card {
     border: 1px solid var(--app-border);
-    border-radius: 1.35rem;
-    background: color-mix(in srgb, var(--app-surface) 94%, white);
-    box-shadow: 0 18px 44px rgb(16 25 35 / 0.08);
+    border-radius: var(--app-radius-card);
+    background: rgb(255 255 255 / 0.82);
+    box-shadow: var(--app-shadow-soft);
+    backdrop-filter: blur(20px);
   }
 
   .app-card-strong {
     border: 1px solid color-mix(in srgb, var(--app-border) 78%, var(--app-primary));
     border-radius: var(--app-radius-card);
-    background: linear-gradient(145deg, #123241 0%, #101923 58%, #047857 140%);
+    background: var(--app-primary);
     box-shadow: var(--app-shadow);
   }
 
@@ -109,14 +112,14 @@ textarea {
     color: var(--app-accent);
     font-size: 0.875rem;
     font-weight: 650;
-    box-shadow: 0 8px 18px rgb(4 120 87 / 0.08);
+    box-shadow: 0 8px 18px rgb(47 116 88 / 0.08);
   }
 
   .app-title {
     color: var(--app-ink);
     font-size: clamp(2rem, 8vw, 3rem);
-    font-weight: 750;
-    letter-spacing: 0;
+    font-weight: 800;
+    letter-spacing: -0.055em;
     line-height: 1.02;
   }
 
@@ -124,10 +127,11 @@ textarea {
     position: relative;
     overflow: hidden;
     border: 1px solid rgb(255 255 255 / 0.7);
-    border-radius: 2rem;
-    background: linear-gradient(145deg, #fffdf8 0%, #edf4ee 52%, #e3e8e4 100%);
+    border-radius: 1.75rem;
+    background: rgb(255 255 255 / 0.76);
     padding: 1.25rem;
-    box-shadow: 0 28px 70px rgb(16 25 35 / 0.1);
+    box-shadow: var(--app-shadow);
+    backdrop-filter: blur(20px);
   }
 
   .premium-page-hero::before {
@@ -138,16 +142,16 @@ textarea {
     width: 15rem;
     height: 15rem;
     border-radius: 999px;
-    background: rgb(4 120 87 / 0.22);
+    background: rgb(47 116 88 / 0.15);
     filter: blur(52px);
   }
 
   .premium-panel {
-    border: 1px solid rgb(255 255 255 / 0.72);
-    border-radius: 1.65rem;
-    background: rgb(255 255 255 / 0.66);
-    box-shadow: 0 20px 55px rgb(16 25 35 / 0.08);
-    backdrop-filter: blur(18px);
+    border: 1px solid var(--app-border);
+    border-radius: var(--app-radius-card);
+    background: rgb(255 255 255 / 0.8);
+    box-shadow: var(--app-shadow-soft);
+    backdrop-filter: blur(20px);
   }
 
   .app-subtitle {
@@ -160,7 +164,7 @@ textarea {
   .btn-secondary,
   .btn-danger,
   .icon-button {
-    border-radius: 1rem;
+    border-radius: 0.9rem;
     transition:
       background-color 160ms ease,
       border-color 160ms ease,
@@ -180,11 +184,11 @@ textarea {
     color: white;
     font-size: 0.875rem;
     font-weight: 700;
-    box-shadow: 0 16px 30px rgb(15 38 51 / 0.18);
+    box-shadow: 0 14px 28px rgb(24 28 25 / 0.18);
   }
 
   .btn-primary:hover {
-    background: #173746;
+    background: #2a302c;
     transform: translateY(-1px);
   }
 
@@ -200,7 +204,7 @@ textarea {
   .icon-button:focus-visible,
   .form-control:focus {
     outline: none;
-    box-shadow: 0 0 0 4px rgb(4 120 87 / 0.16);
+    box-shadow: 0 0 0 4px rgb(47 116 88 / 0.18);
   }
 
   .btn-secondary {
@@ -258,7 +262,7 @@ textarea {
     width: 100%;
     border: 1px solid var(--app-border);
     border-radius: var(--app-radius-control);
-    background: color-mix(in srgb, var(--app-surface) 68%, var(--app-surface-muted));
+    background: #f5f6f3;
     padding: 0 1rem;
     color: var(--app-ink);
     font-size: 0.875rem;
@@ -273,9 +277,124 @@ textarea {
     background: var(--app-surface);
   }
 
-  .metric-tile {
+  .section-eyebrow {
+    color: var(--app-ink-faint);
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+  }
+
+  .section-title {
+    color: var(--app-ink);
+    font-size: clamp(1.45rem, 4vw, 2rem);
+    font-weight: 800;
+    letter-spacing: -0.045em;
+    line-height: 1.1;
+  }
+
+  .quick-action {
+    display: flex;
+    min-height: 5.5rem;
+    align-items: center;
+    gap: 0.85rem;
+    border: 1px solid var(--app-border);
+    border-radius: 1.35rem;
+    background: rgb(255 255 255 / 0.78);
+    padding: 0.9rem;
+    box-shadow: 0 10px 30px rgb(24 28 25 / 0.055);
+    backdrop-filter: blur(16px);
+    transition:
+      transform 180ms ease,
+      background-color 180ms ease,
+      box-shadow 180ms ease;
+  }
+
+  .quick-action:hover {
+    background: white;
+    box-shadow: 0 16px 38px rgb(24 28 25 / 0.09);
+    transform: translateY(-2px);
+  }
+
+  .quick-action:active {
+    transform: scale(0.985);
+  }
+
+  .quick-action-icon,
+  .metric-card-icon {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
     border-radius: 1rem;
-    background: color-mix(in srgb, var(--app-surface-muted) 72%, white);
+  }
+
+  .quick-action-icon {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .quick-action strong,
+  .quick-action small {
+    display: block;
+  }
+
+  .quick-action strong {
+    color: var(--app-ink);
+    font-size: 0.875rem;
+    font-weight: 800;
+  }
+
+  .quick-action small {
+    margin-top: 0.2rem;
+    color: var(--app-ink-muted);
+    font-size: 0.72rem;
+  }
+
+  .metric-card {
+    position: relative;
+    min-height: 12.5rem;
+    overflow: hidden;
+    border: 1px solid var(--app-border);
+    border-radius: var(--app-radius-card);
+    background: rgb(255 255 255 / 0.8);
+    padding: 1.15rem;
+    box-shadow: var(--app-shadow-soft);
+    backdrop-filter: blur(18px);
+  }
+
+  .metric-card-icon {
+    width: 2.65rem;
+    height: 2.65rem;
+  }
+
+  .metric-card p {
+    margin-top: 1.65rem;
+    color: var(--app-ink-muted);
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+
+  .metric-card strong {
+    display: block;
+    margin-top: 0.35rem;
+    color: var(--app-ink);
+    font-size: clamp(1.35rem, 4vw, 1.8rem);
+    font-weight: 800;
+    letter-spacing: -0.045em;
+  }
+
+  .metric-card small {
+    display: block;
+    margin-top: 0.6rem;
+    color: var(--app-ink-faint);
+    font-size: 0.75rem;
+    line-height: 1.45;
+  }
+
+  .metric-tile {
+    border-radius: 1.05rem;
+    background: #f3f4f1;
     padding: 0.8rem;
   }
 
@@ -306,5 +425,96 @@ textarea {
     border-radius: var(--app-radius-card);
     background: var(--app-accent-soft);
     color: var(--app-accent);
+  }
+}
+
+@keyframes card-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes invoice-row-reveal {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes card-shine {
+  0%,
+  65% {
+    transform: translateX(-145%) rotate(18deg);
+  }
+  100% {
+    transform: translateX(220%) rotate(18deg);
+  }
+}
+
+.card-reveal {
+  opacity: 0;
+  animation: card-reveal 560ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.invoice-row {
+  opacity: 0;
+  animation: invoice-row-reveal 420ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.credit-card-visual {
+  isolation: isolate;
+  transition:
+    transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 260ms ease;
+}
+
+.credit-card-visual:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 28px 60px rgb(20 23 21 / 0.22);
+}
+
+.credit-card-visual::after {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(circle at 86% 12%, rgb(255 255 255 / 0.2), transparent 24%),
+    radial-gradient(circle at 12% 92%, rgb(255 255 255 / 0.08), transparent 28%);
+  content: "";
+  pointer-events: none;
+}
+
+.credit-card-shine {
+  position: absolute;
+  inset: -45% auto -45% -35%;
+  width: 18%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgb(255 255 255 / 0.16),
+    transparent
+  );
+  filter: blur(2px);
+  pointer-events: none;
+  animation: card-shine 5.8s ease-in-out 900ms infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
   }
 }

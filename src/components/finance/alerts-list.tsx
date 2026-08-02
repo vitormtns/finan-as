@@ -13,13 +13,13 @@ const severityStyles = {
 
 export function AlertsList({ alerts }: AlertsListProps) {
   return (
-    <section className="app-card p-4">
+    <section className="app-card p-5 sm:p-6">
       <div>
         <h2 className="text-base font-bold text-[var(--app-ink)]">
           Alertas do mês
         </h2>
         <p className="mt-1 text-sm text-[var(--app-ink-muted)]">
-          Conselhos gerados por regras simples, sem integração externa.
+          Mudanças de ritmo e pontos que merecem sua atenção.
         </p>
       </div>
 
@@ -27,7 +27,7 @@ export function AlertsList({ alerts }: AlertsListProps) {
         {alerts.map((alert) => (
           <article
             key={`${alert.type}-${alert.message}`}
-            className={`rounded-lg border p-3 ${severityStyles[alert.severity]}`}
+            className={`rounded-2xl border p-4 ${severityStyles[alert.severity]}`}
           >
             <p className="text-sm font-semibold">{alert.title}</p>
             <p className="mt-1 text-sm leading-6 text-slate-700">

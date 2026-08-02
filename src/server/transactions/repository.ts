@@ -135,8 +135,17 @@ export async function updateTransaction(
 }
 
 export async function deleteTransaction(userId: string, id: string) {
-  return prisma.transaction.delete({
-    where: { id, userId },
+  return prisma.$transaction(async (tx) => {
+    await tx.fixedExpensePayment.deleteMany({
+      where: {
+        userId,
+        transactionId: id,
+      },
+    });
+
+    return tx.transaction.delete({
+      where: { id, userId },
+    });
   });
 }
 

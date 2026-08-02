@@ -1,190 +1,221 @@
 import Link from "next/link";
 import {
-  ArrowUpRight,
+  ArrowRight,
   CalendarDays,
-  Plus,
+  CircleAlert,
+  ReceiptText,
   Sparkles,
-  TrendingDown,
 } from "lucide-react";
 import { formatCurrency } from "@/lib/formatters";
-import type { FinancialAlert } from "@/server/alerts/types";
 import type { MonthlyDashboard } from "@/server/dashboard/types";
 
 type HeroDashboardProps = {
   currentMonth: string;
   dashboard: MonthlyDashboard;
-  mainAlert?: FinancialAlert;
 };
 
-function getBudgetProgress(dashboard: MonthlyDashboard) {
-  if (!dashboard.budgetLimit || dashboard.budgetLimit <= 0) {
-    return null;
+const toneClasses = {
+  info: "bg-white/10 text-white/80",
+  success: "bg-[#b9f6d2] text-[#123d28]",
+  warning: "bg-[#ffe8a8] text-[#624500]",
+  danger: "bg-[#ffd2cb] text-[#70251b]",
+};
+
+function getCashFlowStatus(dashboard: MonthlyDashboard) {
+  if (dashboard.totalIncome === 0) {
+    return { label: "Entradas não registradas", tone: "info" as const };
   }
 
-  return Math.min(
-    Math.round((dashboard.totalExpenses / dashboard.budgetLimit) * 100),
-    140,
-  );
+  if (dashboard.balanceAfterCommitments < 0) {
+    return { label: "Falta cobrir parte do mês", tone: "danger" as const };
+  }
+
+  if (dashboard.overdueFixedExpensesTotal > 0) {
+    return { label: "Há contas vencidas", tone: "warning" as const };
+  }
+
+  if (dashboard.remainingFixedExpensesTotal === 0) {
+    return { label: "Contas fixas em dia", tone: "success" as const };
+  }
+
+  return { label: "Fluxo do mês positivo", tone: "success" as const };
 }
 
-function getInsightStatus(alert?: FinancialAlert) {
-  if (!alert) {
-    return "Ritmo do mês";
+function getCashFlowMessage(dashboard: MonthlyDashboard) {
+  if (dashboard.remainingFixedExpensesTotal === 0) {
+    return "Nenhuma conta fixa está pendente neste mês. O saldo considera tudo o que entrou e já foi registrado.";
   }
 
-  if (alert.severity === "success") {
-    return "Bom sinal";
+  const balance = Math.abs(dashboard.balanceAfterCommitments);
+
+  if (dashboard.balanceAfterCommitments < 0) {
+    return `Depois dos gastos e das contas pendentes, ainda faltam ${formatCurrency(balance)} para fechar o mês.`;
   }
 
-  if (alert.severity === "danger") {
-    return "Atenção fina";
+  return `Depois dos gastos e das contas pendentes, a previsão é sobrar ${formatCurrency(balance)} neste mês.`;
+}
+
+function getCashFlowInsight(dashboard: MonthlyDashboard) {
+  if (dashboard.totalIncome === 0) {
+    return {
+      title: "Registre o que entrou no mês",
+      message:
+        "As entradas são necessárias para calcular quanto sobra depois dos gastos e das contas pendentes.",
+    };
   }
 
-  if (alert.severity === "warning") {
-    return "Ponto de cuidado";
+  if (dashboard.balanceAfterCommitments < 0) {
+    return {
+      title: "As entradas ainda não cobrem tudo",
+      message: `Faltam ${formatCurrency(Math.abs(dashboard.balanceAfterCommitments))} para cobrir os gastos registrados e as contas que ainda vencem.`,
+    };
   }
 
-  return "Insight";
+  if (dashboard.remainingFixedExpensesTotal === 0) {
+    return {
+      title: "As contas previstas estão em dia",
+      message: `Depois do que já foi gasto, seu saldo atual é ${formatCurrency(dashboard.balanceAfterExpenses)}.`,
+    };
+  }
+
+  return {
+    title: "As contas previstas cabem nas entradas",
+    message: `${formatCurrency(dashboard.remainingFixedExpensesTotal)} ainda estão reservados para contas fixas deste mês.`,
+  };
 }
 
 export function HeroDashboard({
   currentMonth,
   dashboard,
-  mainAlert,
 }: HeroDashboardProps) {
-  const budgetProgress = getBudgetProgress(dashboard);
-  const availableAmount = dashboard.availableAmount;
-  const safeDailyAmount = dashboard.dailySpendingAllowance.safeDailyAmount;
+  const status = getCashFlowStatus(dashboard);
+  const balanceIsPositive = dashboard.balanceAfterCommitments >= 0;
+  const commitmentPercentage =
+    dashboard.totalIncome > 0
+      ? Math.round((dashboard.totalCommitted / dashboard.totalIncome) * 100)
+      : null;
+  const insight = getCashFlowInsight(dashboard);
 
   return (
-    <section className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr] lg:gap-5">
-      <div className="relative flex min-h-[27rem] flex-col justify-between overflow-hidden rounded-[1.65rem] bg-[linear-gradient(150deg,#122c3a_0%,#101923_56%,#065f46_130%)] px-7 py-6 text-white shadow-[inset_0_1px_0_rgb(255_255_255_/_0.12),0_22px_60px_rgb(16_25_35_/_0.22)] sm:min-h-[31rem] sm:p-7">
-        <div className="pointer-events-none absolute -left-16 -top-24 size-72 rounded-full bg-emerald-200/20 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-28 right-0 size-80 rounded-full bg-white/10 blur-3xl" />
+    <section className="grid gap-4 lg:grid-cols-[1.42fr_0.58fr]">
+      <article className="relative min-h-[29rem] overflow-hidden rounded-[2rem] bg-[var(--app-primary)] p-5 text-white shadow-[0_28px_80px_rgb(20_23_21_/_0.22)] sm:p-7 lg:min-h-[31rem]">
+        <div className="pointer-events-none absolute -right-24 -top-36 size-[26rem] rounded-full bg-[#4b806a]/45 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-32 -left-20 size-80 rounded-full bg-white/[0.08] blur-3xl" />
 
-        <div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/10 px-3 py-1.5 text-sm font-semibold text-white/78 backdrop-blur">
-            <CalendarDays size={15} aria-hidden="true" />
-            {currentMonth}
-          </div>
-
-          <div className="mt-7 max-w-md">
-            <p className="text-sm font-semibold text-emerald-100/75">
-              Painel financeiro pessoal
-            </p>
-            <h1 className="mt-2 text-5xl font-bold leading-[0.95] tracking-normal sm:text-6xl">
-              Meu Mês
-            </h1>
-            <p className="mt-4 text-base leading-7 text-white/68">
-              O essencial do seu mês em uma leitura rápida: ritmo, limite e
-              próximos cuidados.
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-9 grid gap-3">
-          <div>
-            <p className="text-sm font-medium text-white/58">
-              Você pode gastar hoje
-            </p>
-            <strong className="mt-1 block text-4xl font-bold tracking-normal sm:text-5xl">
-              {safeDailyAmount === null ? "Sem meta" : formatCurrency(safeDailyAmount)}
-            </strong>
-          </div>
-
-          <Link
-            href="/novo"
-            className="group inline-flex min-h-14 items-center justify-between gap-4 rounded-2xl bg-white px-5 text-sm font-bold text-[var(--app-primary)] shadow-[0_18px_38px_rgb(0_0_0_/_0.18)] transition hover:-translate-y-0.5 hover:bg-emerald-50"
-            aria-label="Adicionar gasto"
-          >
-            <span className="inline-flex items-center gap-2">
-              <span className="flex size-9 items-center justify-center rounded-full bg-[var(--app-primary)] text-white">
-                <Plus size={18} strokeWidth={2.4} aria-hidden="true" />
-              </span>
-              Adicionar gasto
-            </span>
-            <ArrowUpRight
-              className="transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-              size={18}
-              aria-hidden="true"
-            />
-          </Link>
-        </div>
-      </div>
-
-      <div className="grid content-between gap-4 lg:mt-0">
-        <article className="rounded-[1.65rem] border border-white/75 bg-white/72 px-6 py-6 shadow-[0_18px_48px_rgb(16_25_35_/_0.1)] backdrop-blur-xl">
+        <div className="relative flex h-full flex-col justify-between gap-12">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <span className="inline-flex items-center gap-2 rounded-full bg-[var(--app-accent-soft)] px-3 py-1 text-xs font-bold uppercase text-[var(--app-accent)]">
-              <Sparkles size={14} aria-hidden="true" />
-              {getInsightStatus(mainAlert)}
+            <span className="inline-flex items-center gap-2 text-sm font-semibold text-white/65">
+              <CalendarDays size={16} aria-hidden="true" />
+              {currentMonth}
             </span>
-            <span className="text-xs font-semibold text-[var(--app-ink-muted)]">
-              {dashboard.remainingDays} dia(s) restantes
+            <span
+              className={`rounded-full px-3 py-1.5 text-xs font-extrabold ${toneClasses[status.tone]}`}
+            >
+              {status.label}
             </span>
           </div>
 
-          <h2 className="mt-6 text-2xl font-bold leading-tight text-[var(--app-ink)]">
-            {mainAlert?.title ?? dashboard.orientation.title}
-          </h2>
-          <p className="mt-4 text-sm leading-6 text-[var(--app-ink-muted)]">
-            {mainAlert?.message ?? dashboard.orientation.description}
-          </p>
-
-          <div className="mt-8 rounded-2xl bg-[var(--app-primary)] px-5 py-5 text-white">
-            <p className="text-xs font-semibold uppercase text-white/54">
-              Saldo da meta
+          <div className="max-w-2xl">
+            <p className="text-sm font-semibold text-white/58">
+              Ainda falta pagar
             </p>
-            <strong className="mt-2 block text-3xl font-bold tracking-normal">
-              {availableAmount === null
-                ? "Sem meta"
-                : formatCurrency(Math.abs(availableAmount))}
-            </strong>
-            <p className="mt-3 text-sm leading-6 text-white/64">
-              {availableAmount === null
-                ? "Configure uma meta para acompanhar a margem."
-                : availableAmount < 0
-                  ? "Acima do planejado para este mês."
-                  : "Ainda disponível antes dos fixos futuros."}
+            <h1 className="mt-3 text-[clamp(3.25rem,12vw,6.6rem)] font-bold leading-[0.86] tracking-[-0.075em] text-white">
+              {formatCurrency(dashboard.remainingFixedExpensesTotal)}
+            </h1>
+            <p className="mt-6 max-w-xl text-sm leading-6 text-white/65 sm:text-base sm:leading-7">
+              {getCashFlowMessage(dashboard)}
             </p>
           </div>
-        </article>
 
-        <div className="grid grid-cols-2 gap-3">
-          <div className="rounded-[1.25rem] border border-white/70 bg-white/68 p-4 shadow-[0_12px_32px_rgb(16_25_35_/_0.08)] backdrop-blur">
-            <p className="text-xs font-semibold text-[var(--app-ink-muted)]">
-              Gasto no mês
-            </p>
-            <strong className="mt-2 block text-2xl font-bold text-[var(--app-ink)]">
-              {formatCurrency(dashboard.totalExpenses)}
-            </strong>
-            {budgetProgress !== null ? (
-              <div className="mt-4">
-                <div className="h-2 overflow-hidden rounded-full bg-slate-200/80">
-                  <div
-                    className="h-full rounded-full bg-[var(--app-accent)]"
-                    style={{ width: `${Math.min(budgetProgress, 100)}%` }}
-                  />
-                </div>
-                <p className="mt-2 text-xs text-[var(--app-ink-muted)]">
-                  {budgetProgress}% da meta
-                </p>
+          <div className="grid grid-cols-3 gap-2 border-t border-white/10 pt-5 sm:gap-4">
+            <div>
+              <p className="text-[0.65rem] font-bold uppercase tracking-[0.08em] text-white/42 sm:text-xs">
+                Entrou
+              </p>
+              <strong className="mt-2 block text-sm font-bold sm:text-lg">
+                {formatCurrency(dashboard.totalIncome)}
+              </strong>
+            </div>
+            <div>
+              <p className="text-[0.65rem] font-bold uppercase tracking-[0.08em] text-white/42 sm:text-xs">
+                Já gastou
+              </p>
+              <strong className="mt-2 block text-sm font-bold sm:text-lg">
+                {formatCurrency(dashboard.totalExpenses)}
+              </strong>
+            </div>
+            <div>
+              <p className="text-[0.65rem] font-bold uppercase tracking-[0.08em] text-white/42 sm:text-xs">
+                {balanceIsPositive ? "Sobra prevista" : "Falta cobrir"}
+              </p>
+              <strong className="mt-2 block text-sm font-bold sm:text-lg">
+                {formatCurrency(Math.abs(dashboard.balanceAfterCommitments))}
+              </strong>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
+        <article className="app-card flex min-h-64 flex-col justify-between p-5 sm:p-6">
+          <div className="flex items-start justify-between gap-3">
+            <span className="flex size-11 items-center justify-center rounded-2xl bg-[var(--app-primary-soft)] text-[var(--app-primary)]">
+              <Sparkles size={20} strokeWidth={2.15} aria-hidden="true" />
+            </span>
+            {commitmentPercentage !== null ? (
+              <div
+                className="grid size-16 place-items-center rounded-full"
+                style={{
+                  background: `conic-gradient(var(--app-accent) ${Math.min(commitmentPercentage, 100)}%, var(--app-surface-muted) ${Math.min(commitmentPercentage, 100)}% 100%)`,
+                }}
+                aria-label={`${commitmentPercentage}% das entradas comprometidas`}
+              >
+                <span className="grid size-12 place-items-center rounded-full bg-white text-xs font-extrabold text-[var(--app-ink)]">
+                  {commitmentPercentage}%
+                </span>
               </div>
             ) : null}
           </div>
 
-          <div className="rounded-[1.25rem] border border-white/70 bg-white/68 p-4 shadow-[0_12px_32px_rgb(16_25_35_/_0.08)] backdrop-blur">
-            <span className="flex size-9 items-center justify-center rounded-full bg-[var(--app-warning-soft)] text-[var(--app-warning)]">
-              <TrendingDown size={17} aria-hidden="true" />
-            </span>
-            <p className="mt-4 text-xs font-semibold text-[var(--app-ink-muted)]">
-              Projeção
+          <div className="mt-8">
+            <p className="text-xs font-extrabold uppercase tracking-[0.08em] text-[var(--app-ink-faint)]">
+              Leitura do mês
             </p>
-            <strong className="mt-1 block text-2xl font-bold text-[var(--app-ink)]">
-              {formatCurrency(dashboard.projectedMonthTotal)}
-            </strong>
+            <h2 className="mt-3 text-xl font-extrabold leading-tight tracking-[-0.03em] text-[var(--app-ink)]">
+              {insight.title}
+            </h2>
+            <p className="mt-3 text-sm leading-6 text-[var(--app-ink-muted)]">
+              {insight.message}
+            </p>
           </div>
-        </div>
+        </article>
+
+        <article className="rounded-[1.75rem] bg-[var(--app-accent-soft)] p-5 sm:p-6">
+          <span className="flex size-10 items-center justify-center rounded-2xl bg-white/75 text-[var(--app-accent)] shadow-sm">
+            {dashboard.overdueFixedExpensesTotal > 0 ? (
+              <CircleAlert size={19} aria-hidden="true" />
+            ) : (
+              <ReceiptText size={19} aria-hidden="true" />
+            )}
+          </span>
+          <p className="mt-5 text-sm font-bold text-[var(--app-ink)]">
+            {dashboard.overdueFixedExpensesTotal > 0
+              ? "Contas vencidas"
+              : "Contas fixas pendentes"}
+          </p>
+          <strong className="mt-1 block text-3xl font-bold tracking-[-0.045em] text-[var(--app-ink)]">
+            {dashboard.overdueFixedExpensesTotal > 0
+              ? formatCurrency(dashboard.overdueFixedExpensesTotal)
+              : `${dashboard.remainingFixedExpenses.length} conta${dashboard.remainingFixedExpenses.length === 1 ? "" : "s"}`}
+          </strong>
+          <Link
+            href="/ajustes"
+            className="mt-5 inline-flex items-center gap-2 text-sm font-extrabold text-[var(--app-accent)]"
+          >
+            Conferir contas fixas
+            <ArrowRight size={16} aria-hidden="true" />
+          </Link>
+        </article>
       </div>
     </section>
   );

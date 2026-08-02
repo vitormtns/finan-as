@@ -2,6 +2,10 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { TransactionForm } from "@/components/finance/transaction-form";
 import { MobileNavigation } from "@/components/finance/mobile-navigation";
+import {
+  TRANSACTION_TYPE,
+  type TransactionType,
+} from "@/lib/finance/types";
 import { requireCurrentUserId } from "@/server/auth/current-user";
 import {
   findTransactionForEdit,
@@ -19,8 +23,21 @@ type NewTransactionPageProps = {
   searchParams: Promise<{
     id?: string;
     duplicar?: string;
+    tipo?: string;
+    voltar?: string;
+    cartao?: string;
   }>;
 };
+
+function getInitialType(value?: string): TransactionType {
+  return value === "receita"
+    ? TRANSACTION_TYPE.INCOME
+    : TRANSACTION_TYPE.EXPENSE;
+}
+
+function getReturnHref(value?: string) {
+  return value && /^\/cartoes\/[0-9a-f-]+$/i.test(value) ? value : null;
+}
 
 async function loadPageData(params: { id?: string; duplicateId?: string }): Promise<{
   options: TransactionFormOptions;
@@ -53,13 +70,21 @@ async function loadPageData(params: { id?: string; duplicateId?: string }): Prom
 export default async function NewTransactionPage({
   searchParams,
 }: NewTransactionPageProps) {
-  const { id, duplicar } = await searchParams;
+  const { id, duplicar, tipo, voltar, cartao } = await searchParams;
   const { options, transaction, error } = await loadPageData({
     id,
     duplicateId: id ? undefined : duplicar,
   });
   const isEditing = Boolean(id);
   const isDuplicating = !isEditing && Boolean(duplicar);
+  const initialType = getInitialType(tipo);
+  const resolvedType = transaction?.type ?? initialType;
+  const transactionLabel =
+    resolvedType === TRANSACTION_TYPE.INCOME ? "receita" : "despesa";
+  const returnHref = getReturnHref(voltar);
+  const initialCardId = options.cards.some((card) => card.id === cartao)
+    ? cartao
+    : null;
 
   return (
     <div className="app-shell">
@@ -67,19 +92,19 @@ export default async function NewTransactionPage({
         <header className="premium-page-hero">
           <div className="relative">
           <Link
-            href="/gastos"
+            href={returnHref ?? "/gastos"}
             className="inline-flex items-center gap-2 rounded-full bg-white/70 px-3 py-2 text-sm font-bold text-[var(--app-primary)] shadow-sm transition hover:bg-white"
           >
             <ArrowLeft size={17} aria-hidden="true" />
-            Voltar para gastos
+            {returnHref ? "Voltar para a fatura" : "Voltar para movimentos"}
           </Link>
 
           <h1 className="mt-5 app-title">
             {isEditing
-              ? "Editar gasto"
+              ? `Editar ${transactionLabel}`
               : isDuplicating
-                ? "Duplicar gasto"
-                : "Novo gasto"}
+                ? `Duplicar ${transactionLabel}`
+                : `Nova ${transactionLabel}`}
           </h1>
           <p className="app-subtitle mt-2">
             {isDuplicating
@@ -121,6 +146,9 @@ export default async function NewTransactionPage({
           <TransactionForm
             options={options}
             initialTransaction={transaction}
+            initialType={resolvedType}
+            returnTo={returnHref}
+            initialCardId={initialCardId}
           />
         ) : null}
       </main>

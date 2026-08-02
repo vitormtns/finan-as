@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { requireCurrentUserId } from "@/server/auth/current-user";
 import { listTransactionsByMonth as listTransactionsByMonthRepository } from "./repository";
 import {
@@ -16,7 +17,8 @@ export type TransactionActionState = {
   fieldErrors?: Record<string, string[] | undefined>;
 };
 
-const defaultErrorMessage = "Não foi possível salvar o gasto. Tente novamente.";
+const defaultErrorMessage =
+  "Não foi possível salvar a movimentação. Tente novamente.";
 
 function revalidateTransactionViews() {
   revalidatePath("/");
@@ -24,12 +26,21 @@ function revalidateTransactionViews() {
   revalidatePath("/novo");
   revalidatePath("/metas");
   revalidatePath("/cartoes");
+  revalidatePath("/cartoes/[id]", "page");
   revalidatePath("/relatorios");
   revalidatePath("/alertas");
 }
 
 function formDataToObject(formData: FormData) {
   return Object.fromEntries(formData.entries());
+}
+
+function getSafeReturnPath(formData: FormData) {
+  const value = formData.get("returnTo");
+
+  return typeof value === "string" && /^\/cartoes\/[0-9a-f-]+$/i.test(value)
+    ? value
+    : null;
 }
 
 export async function createTransactionAction(
@@ -46,25 +57,36 @@ export async function createTransactionAction(
     };
   }
 
+  let totalCreated = 0;
+
   try {
     const userId = await requireCurrentUserId();
     const result = await createTransaction(userId, parsed.data);
+    totalCreated = result.totalCreated;
 
     revalidateTransactionViews();
-
-    return {
-      status: "success",
-      message:
-        result.totalCreated > 1
-          ? "Compra parcelada salva com sucesso."
-          : "Gasto salvo com sucesso.",
-    };
   } catch (error) {
     return {
       status: "error",
       message: error instanceof Error ? error.message : defaultErrorMessage,
     };
   }
+
+  const returnPath = getSafeReturnPath(formData);
+
+  if (returnPath) {
+    redirect(returnPath);
+  }
+
+  return {
+    status: "success",
+    message:
+      totalCreated > 1
+        ? "Compra parcelada salva com sucesso."
+        : parsed.data.type === "INCOME"
+          ? "Receita salva com sucesso."
+          : "Despesa salva com sucesso.",
+  };
 }
 
 export async function updateTransactionAction(
@@ -94,17 +116,23 @@ export async function updateTransactionAction(
     await editTransaction(userId, id, parsed.data);
 
     revalidateTransactionViews();
-
-    return {
-      status: "success",
-      message: "Gasto atualizado com sucesso.",
-    };
   } catch (error) {
     return {
       status: "error",
       message: error instanceof Error ? error.message : defaultErrorMessage,
     };
   }
+
+  const returnPath = getSafeReturnPath(formData);
+
+  if (returnPath) {
+    redirect(returnPath);
+  }
+
+  return {
+    status: "success",
+    message: "Movimentação atualizada com sucesso.",
+  };
 }
 
 export async function deleteTransactionAction(formData: FormData) {

@@ -17,7 +17,7 @@ export function CategoryList({
   subtitle = "Distribuição do mês atual",
 }: CategoryListProps) {
   return (
-    <section className="app-card p-4">
+    <section className="app-card p-5 sm:p-6">
       <div>
         <h2 className="text-base font-bold text-[var(--app-ink)]">
           Gastos por categoria

@@ -8,7 +8,7 @@ type FixedExpensesCardProps = {
 
 export function FixedExpensesCard({ expenses, total }: FixedExpensesCardProps) {
   return (
-    <section className="app-card p-4">
+    <section className="app-card p-5 sm:p-6">
       <div>
         <h2 className="text-base font-bold text-[var(--app-ink)]">
           Fixos restantes

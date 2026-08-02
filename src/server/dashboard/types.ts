@@ -48,6 +48,9 @@ export type MonthlyDashboard = {
   remainingDays: number;
   totalExpenses: number;
   totalIncome: number;
+  balanceAfterExpenses: number;
+  totalCommitted: number;
+  balanceAfterCommitments: number;
   budgetLimit: number | null;
   availableAmount: number | null;
   safeDailyLimit: number | null;

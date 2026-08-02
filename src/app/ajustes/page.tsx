@@ -276,7 +276,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
                     {isEditing ? "Editar gasto fixo" : "Novo gasto fixo"}
                   </h2>
                   <p className="mt-1 text-sm text-[var(--app-ink-muted)]">
-                    Mantenha a lista enxuta para a dashboard ficar precisa.
+                    Mantenha a lista enxuta para o painel ficar preciso.
                   </p>
                 </div>
 

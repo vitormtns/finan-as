@@ -62,25 +62,27 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
   const { report, error } = await loadReport(month, year);
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,#dbeafe_0,#f8fafc_34rem)] pb-28 md:pb-0">
+    <div className="app-shell">
       <main className="mx-auto flex w-full max-w-6xl flex-col gap-5 px-4 py-5 sm:px-6 md:py-8">
-        <header>
-          <div className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-white/80 px-3 py-1 text-sm font-medium text-blue-700 shadow-sm shadow-blue-100/70">
+        <header className="premium-page-hero">
+          <div className="relative">
+          <div className="app-kicker">
             <BarChart3 size={16} aria-hidden="true" />
             {formatMonth(new Date(year, month - 1, 1))}
           </div>
-          <h1 className="mt-4 text-3xl font-semibold text-slate-950">
+          <h1 className="mt-4 app-title">
             Relatórios
           </h1>
-          <p className="mt-2 max-w-xl text-base leading-7 text-slate-600">
-            Uma leitura simples para entender onde o dinheiro está indo.
+          <p className="app-subtitle mt-2 max-w-xl">
+            Tendências e comparações para entender seu dinheiro sem planilhas.
           </p>
+          </div>
         </header>
 
-        <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/70">
+        <section className="premium-panel p-4">
           <form className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <label className="text-sm font-semibold text-slate-700" htmlFor="mes">
+              <label className="form-label" htmlFor="mes">
                 Selecionar mês e ano
               </label>
               <input
@@ -88,12 +90,12 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
                 name="mes"
                 type="month"
                 defaultValue={inputValue}
-                className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm text-slate-950 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-100 sm:w-48"
+                className="form-control mt-2 min-h-11 sm:w-48"
               />
             </div>
             <button
               type="submit"
-              className="min-h-11 rounded-lg border border-slate-200 bg-slate-50 px-4 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-white focus:outline-none focus:ring-4 focus:ring-blue-100"
+              className="btn-secondary min-h-11"
             >
               Atualizar relatório
             </button>
@@ -101,7 +103,7 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
         </section>
 
         {error ? (
-          <section className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          <section className="alert-danger p-4 text-sm">
             {error}
           </section>
         ) : null}
@@ -109,32 +111,32 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
         {report ? (
           <>
             <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/70">
-                <p className="text-sm font-medium text-slate-500">
+              <article className="app-card p-4">
+                <p className="text-sm font-semibold text-[var(--app-ink-muted)]">
                   Despesas
                 </p>
-                <strong className="mt-2 block text-2xl font-semibold text-slate-950">
+                <strong className="mt-2 block text-2xl font-bold text-[var(--app-ink)]">
                   {formatCurrency(report.totalExpenses)}
                 </strong>
               </article>
-              <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/70">
-                <p className="text-sm font-medium text-slate-500">Receitas</p>
-                <strong className="mt-2 block text-2xl font-semibold text-slate-950">
+              <article className="app-card p-4">
+                <p className="text-sm font-semibold text-[var(--app-ink-muted)]">Receitas</p>
+                <strong className="mt-2 block text-2xl font-bold text-[var(--app-ink)]">
                   {formatCurrency(report.totalIncome)}
                 </strong>
               </article>
-              <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/70">
-                <p className="text-sm font-medium text-slate-500">Saldo</p>
+              <article className="app-card p-4">
+                <p className="text-sm font-semibold text-[var(--app-ink-muted)]">Saldo</p>
                 <strong
-                  className={`mt-2 block text-2xl font-semibold ${
+                  className={`mt-2 block text-2xl font-bold ${
                     report.balance < 0 ? "text-red-600" : "text-slate-950"
                   }`}
                 >
                   {formatCurrency(report.balance)}
                 </strong>
               </article>
-              <article className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/70">
-                <p className="text-sm font-medium text-slate-500">
+              <article className="app-card p-4">
+                <p className="text-sm font-semibold text-[var(--app-ink-muted)]">
                   Comparativo
                 </p>
                 <div className="mt-2 flex items-center gap-2">
@@ -143,22 +145,22 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
                   ) : (
                     <TrendingDown className="text-emerald-600" size={20} />
                   )}
-                  <strong className="text-lg font-semibold text-slate-950">
+                  <strong className="text-lg font-bold text-[var(--app-ink)]">
                     {formatCurrency(Math.abs(report.comparison.differenceAmount))}
                   </strong>
                 </div>
-                <p className="mt-2 text-sm leading-5 text-slate-500">
+                <p className="mt-2 text-sm leading-5 text-[var(--app-ink-muted)]">
                   {comparisonText(report)}
                 </p>
               </article>
             </section>
 
             {!report.hasData ? (
-              <section className="rounded-lg border border-dashed border-slate-200 bg-white p-6 text-center shadow-sm shadow-slate-200/70">
-                <h2 className="text-base font-semibold text-slate-950">
+              <section className="app-card border-dashed p-6 text-center">
+                <h2 className="text-base font-bold text-[var(--app-ink)]">
                   Sem dados neste mês
                 </h2>
-                <p className="mt-2 text-sm leading-6 text-slate-500">
+                <p className="mt-2 text-sm leading-6 text-[var(--app-ink-muted)]">
                   Cadastre transações para ver categorias, formas de pagamento e
                   maiores gastos.
                 </p>

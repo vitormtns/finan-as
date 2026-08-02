@@ -211,7 +211,7 @@ export function FixedExpenseForm({
               Gasto ativo
             </span>
             <span className="mt-1 block text-xs text-[var(--app-ink-muted)]">
-              Gastos inativos ficam salvos, mas não entram na dashboard.
+              Gastos inativos ficam salvos, mas não entram no painel.
             </span>
           </span>
           <input

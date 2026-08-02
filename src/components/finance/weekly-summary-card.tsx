@@ -34,7 +34,7 @@ export function WeeklySummaryCard({ summary }: WeeklySummaryCardProps) {
   const ComparisonIcon = isAbovePreviousWeek ? TrendingUp : TrendingDown;
 
   return (
-    <section className="app-card p-4">
+    <section className="app-card p-5 sm:p-6">
       <div>
         <h2 className="text-base font-bold text-[var(--app-ink)]">Esta semana</h2>
         <p className="mt-1 text-sm text-[var(--app-ink-muted)]">
@@ -69,7 +69,7 @@ export function WeeklySummaryCard({ summary }: WeeklySummaryCardProps) {
       </div>
 
       <div
-        className={`mt-4 flex items-start gap-2 rounded-lg border p-3 text-sm leading-6 ${
+        className={`mt-4 flex items-start gap-2 rounded-2xl border p-3 text-sm leading-6 ${
           isAbovePreviousWeek
             ? "border-amber-100 bg-amber-50 text-amber-700"
             : "border-emerald-100 bg-emerald-50 text-emerald-700"

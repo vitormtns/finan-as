@@ -22,6 +22,9 @@ import {
 type TransactionFormProps = {
   options: TransactionFormOptions;
   initialTransaction?: EditableTransaction | null;
+  initialType?: TransactionType;
+  returnTo?: string | null;
+  initialCardId?: string | null;
 };
 
 const initialState: TransactionActionState = {
@@ -29,8 +32,16 @@ const initialState: TransactionActionState = {
   message: "",
 };
 
-function SubmitButton({ isEditing }: { isEditing: boolean }) {
+function SubmitButton({
+  isEditing,
+  type,
+}: {
+  isEditing: boolean;
+  type: TransactionType;
+}) {
   const { pending } = useFormStatus();
+  const transactionLabel =
+    type === TRANSACTION_TYPE.INCOME ? "receita" : "despesa";
 
   return (
     <button
@@ -38,7 +49,11 @@ function SubmitButton({ isEditing }: { isEditing: boolean }) {
       disabled={pending}
       className="btn-primary min-h-12 w-full disabled:cursor-not-allowed disabled:opacity-60"
     >
-      {pending ? "Salvando..." : isEditing ? "Salvar alterações" : "Salvar gasto"}
+      {pending
+        ? "Salvando..."
+        : isEditing
+          ? "Salvar alterações"
+          : `Salvar ${transactionLabel}`}
     </button>
   );
 }
@@ -54,15 +69,19 @@ function FieldError({ errors }: { errors?: string[] }) {
 export function TransactionForm({
   options,
   initialTransaction,
+  initialType = TRANSACTION_TYPE.EXPENSE,
+  returnTo,
+  initialCardId,
 }: TransactionFormProps) {
   const isEditing = Boolean(initialTransaction?.id);
   const action = isEditing ? updateTransactionAction : createTransactionAction;
   const [state, formAction] = useActionState(action, initialState);
   const [type, setType] = useState<TransactionType>(
-    initialTransaction?.type ?? TRANSACTION_TYPE.EXPENSE,
+    initialTransaction?.type ?? initialType,
   );
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(
-    initialTransaction?.paymentMethod ?? PAYMENT_METHOD.PIX,
+    initialTransaction?.paymentMethod ??
+      (initialCardId ? PAYMENT_METHOD.CREDIT : PAYMENT_METHOD.PIX),
   );
   const [isInstallment, setIsInstallment] = useState(
     initialTransaction?.isInstallment ?? false,
@@ -83,8 +102,18 @@ export function TransactionForm({
       {initialTransaction?.id ? (
         <input type="hidden" name="id" value={initialTransaction.id} />
       ) : null}
+      {returnTo ? (
+        <input type="hidden" name="returnTo" value={returnTo} />
+      ) : null}
 
       <div className="grid gap-4">
+        {initialTransaction?.isInstallment ? (
+          <div className="alert-warning p-4 text-sm leading-6">
+            Você está editando somente a parcela {initialTransaction.installmentNumber}/
+            {initialTransaction.totalInstallments}. As demais parcelas serão mantidas.
+          </div>
+        ) : null}
+
         <div>
           <label className="form-label" htmlFor="amount">
             Valor
@@ -105,7 +134,7 @@ export function TransactionForm({
             className="form-label"
             htmlFor="description"
           >
-            Descrição
+            Nome ou descrição
           </label>
           <input
             id="description"
@@ -201,7 +230,7 @@ export function TransactionForm({
             <select
               id="cardId"
               name="cardId"
-              defaultValue={initialTransaction?.cardId ?? ""}
+              defaultValue={initialTransaction?.cardId ?? initialCardId ?? ""}
               className="form-control mt-2"
             >
               <option value="">Selecione um cartão</option>
@@ -284,7 +313,7 @@ export function TransactionForm({
           </div>
         ) : null}
 
-        <SubmitButton isEditing={isEditing} />
+        <SubmitButton isEditing={isEditing} type={type} />
       </div>
     </form>
   );
