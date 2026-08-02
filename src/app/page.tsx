@@ -193,7 +193,7 @@ export default async function Home() {
                   </span>
                   <p>Contas a pagar</p>
                   <strong>{formatCurrency(dashboard.outstandingBillsTotal)}</strong>
-                  <small>Contas fixas mais as faturas atual e próxima dos cartões.</small>
+                  <small>Contas fixas mais a fatura vigente dos cartões.</small>
                 </article>
 
                 <article className="metric-card">

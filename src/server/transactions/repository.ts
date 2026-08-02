@@ -1,6 +1,11 @@
 import type { Prisma } from "@prisma/client";
 import { TransactionType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import {
+  getAccountingQueryStart,
+  getTransactionAccountingDate,
+  isTransactionInAccountingPeriod,
+} from "./accounting-date";
 import type {
   EditableTransaction,
   TransactionFormOptions,
@@ -86,7 +91,7 @@ export async function listTransactionsByMonth(
     where: {
       userId,
       date: {
-        gte: startDate,
+        gte: getAccountingQueryStart(startDate),
         lt: endDate,
       },
     },
@@ -96,12 +101,21 @@ export async function listTransactionsByMonth(
         select: { name: true, color: true },
       },
       card: {
-        select: { name: true },
+        select: { name: true, closingDay: true, dueDay: true },
       },
     },
   });
 
-  return transactions.map((transaction) => ({
+  return transactions
+    .filter((transaction) =>
+      isTransactionInAccountingPeriod(transaction, startDate, endDate),
+    )
+    .sort(
+      (a, b) =>
+        getTransactionAccountingDate(b).getTime() -
+        getTransactionAccountingDate(a).getTime(),
+    )
+    .map((transaction) => ({
     id: transaction.id,
     amount: Number(transaction.amount),
     description:
@@ -109,14 +123,15 @@ export async function listTransactionsByMonth(
       (transaction.type === TransactionType.EXPENSE ? "Gasto sem descrição" : "Receita sem descrição"),
     type: transaction.type,
     paymentMethod: transaction.paymentMethod,
-    date: transaction.date.toISOString().slice(0, 10),
+    date: getTransactionAccountingDate(transaction).toISOString().slice(0, 10),
+    originalDate: transaction.date.toISOString().slice(0, 10),
     categoryName: transaction.category?.name ?? "Sem categoria",
     categoryColor: transaction.category?.color ?? null,
     cardName: transaction.card?.name ?? null,
     isInstallment: transaction.isInstallment,
     installmentNumber: transaction.installmentNumber,
     totalInstallments: transaction.totalInstallments,
-  }));
+    }));
 }
 
 export async function createTransactions(data: Prisma.TransactionCreateManyInput[]) {

@@ -3,7 +3,15 @@ import { prisma } from "@/lib/prisma";
 import { formatCurrency } from "@/lib/formatters";
 import { getCardsPageData } from "@/server/cards/service";
 import { getFutureFixedExpensesForMonth } from "@/server/fixed-expenses/service";
-import { calculateMonthlyCashFlow } from "./cash-flow";
+import {
+  getAccountingQueryStart,
+  getTransactionAccountingDate,
+  isTransactionInAccountingPeriod,
+} from "@/server/transactions/accounting-date";
+import {
+  calculateMonthlyCashFlow,
+  sumCurrentCardInvoices,
+} from "./cash-flow";
 import type {
   DailySpendingAllowance,
   DashboardCategory,
@@ -297,7 +305,7 @@ export async function getMonthlyDashboard(
       where: {
         userId,
         date: {
-          gte: reference.startDate,
+          gte: getAccountingQueryStart(reference.startDate),
           lt: reference.endDate,
         },
       },
@@ -307,6 +315,12 @@ export async function getMonthlyDashboard(
             id: true,
             name: true,
             color: true,
+          },
+        },
+        card: {
+          select: {
+            closingDay: true,
+            dueDay: true,
           },
         },
       },
@@ -329,7 +343,7 @@ export async function getMonthlyDashboard(
         userId,
         type: TransactionType.EXPENSE,
         date: {
-          gte: previousWeekStartDate,
+          gte: getAccountingQueryStart(previousWeekStartDate),
           lt: currentWeekEndDate,
         },
       },
@@ -341,15 +355,28 @@ export async function getMonthlyDashboard(
             color: true,
           },
         },
+        card: {
+          select: {
+            closingDay: true,
+            dueDay: true,
+          },
+        },
       },
     }),
     getCardsPageData(userId, undefined, date),
   ]);
 
-  const expenseTransactions = transactions.filter(
+  const monthlyTransactions = transactions.filter((transaction) =>
+    isTransactionInAccountingPeriod(
+      transaction,
+      reference.startDate,
+      reference.endDate,
+    ),
+  );
+  const expenseTransactions = monthlyTransactions.filter(
     (transaction) => transaction.type === TransactionType.EXPENSE,
   );
-  const incomeTransactions = transactions.filter(
+  const incomeTransactions = monthlyTransactions.filter(
     (transaction) => transaction.type === TransactionType.INCOME,
   );
   const paidExpenseTransactions = expenseTransactions.filter(
@@ -416,13 +443,7 @@ export async function getMonthlyDashboard(
   const remainingFixedExpenses = futureFixedExpenses.expenses;
   const remainingFixedExpensesTotal = futureFixedExpenses.total;
   const overdueFixedExpensesTotal = futureFixedExpenses.overdueTotal;
-  const cardInvoicesTotal = roundMoney(
-    cardsPageData.cards.reduce(
-      (sum, card) =>
-        sum + card.currentInvoiceTotal + card.nextInvoiceTotal,
-      0,
-    ),
-  );
+  const cardInvoicesTotal = sumCurrentCardInvoices(cardsPageData.cards);
   const {
     balanceAfterExpenses,
     outstandingBillsTotal,
@@ -452,14 +473,14 @@ export async function getMonthlyDashboard(
   });
   const currentWeekTransactions = weeklyTransactions.filter(
     (transaction) => {
-      const dateKey = toDateKey(transaction.date);
+      const dateKey = toDateKey(getTransactionAccountingDate(transaction));
 
       return dateKey >= currentWeekStartKey && dateKey < currentWeekEndKey;
     },
   );
   const previousWeekTransactions = weeklyTransactions.filter(
     (transaction) => {
-      const dateKey = toDateKey(transaction.date);
+      const dateKey = toDateKey(getTransactionAccountingDate(transaction));
 
       return dateKey >= previousWeekStartKey && dateKey < previousWeekEndKey;
     },

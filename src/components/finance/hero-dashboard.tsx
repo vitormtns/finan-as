@@ -46,7 +46,7 @@ function getCashFlowMessage(dashboard: MonthlyDashboard) {
     return "Nenhuma conta está pendente. O saldo considera o que entrou e os pagamentos já realizados.";
   }
 
-  return `São ${formatCurrency(dashboard.remainingFixedExpensesTotal)} em contas fixas e ${formatCurrency(dashboard.cardInvoicesTotal)} nas faturas atual e próxima.`;
+  return `São ${formatCurrency(dashboard.remainingFixedExpensesTotal)} em contas fixas e ${formatCurrency(dashboard.cardInvoicesTotal)} na fatura vigente.`;
 }
 
 function getCashFlowInsight(dashboard: MonthlyDashboard) {
@@ -202,7 +202,7 @@ export function HeroDashboard({
               </strong>
             </div>
             <div className="flex items-center justify-between gap-3 py-3">
-              <span className="text-sm text-[var(--app-ink-muted)]">Faturas de cartão</span>
+              <span className="text-sm text-[var(--app-ink-muted)]">Fatura vigente</span>
               <strong className="text-sm font-extrabold text-[var(--app-ink)]">
                 {formatCurrency(dashboard.cardInvoicesTotal)}
               </strong>

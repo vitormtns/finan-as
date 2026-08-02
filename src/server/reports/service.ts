@@ -1,6 +1,11 @@
 import { TransactionType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { paymentMethodLabels } from "@/server/transactions/labels";
+import {
+  getAccountingQueryStart,
+  getTransactionAccountingDate,
+  isTransactionInAccountingPeriod,
+} from "@/server/transactions/accounting-date";
 import type {
   MonthlyReport,
   ReportBreakdownItem,
@@ -55,40 +60,44 @@ export async function getMonthlyReport(
   const previousMonth = getPreviousMonth(month, year);
   const previousRange = getMonthRange(previousMonth.month, previousMonth.year);
 
-  const [transactions, previousExpensesAggregate] = await Promise.all([
-    prisma.transaction.findMany({
-      where: {
-        userId,
-        date: {
-          gte: startDate,
-          lt: endDate,
+  const transactionCandidates = await prisma.transaction.findMany({
+    where: {
+      userId,
+      date: {
+        gte: getAccountingQueryStart(previousRange.startDate),
+        lt: endDate,
+      },
+    },
+    include: {
+      category: {
+        select: {
+          id: true,
+          name: true,
+          color: true,
         },
       },
-      include: {
-        category: {
-          select: {
-            id: true,
-            name: true,
-            color: true,
-          },
+      card: {
+        select: {
+          closingDay: true,
+          dueDay: true,
         },
       },
-      orderBy: [{ amount: "desc" }, { date: "desc" }],
-    }),
-    prisma.transaction.aggregate({
-      where: {
-        userId,
-        type: TransactionType.EXPENSE,
-        date: {
-          gte: previousRange.startDate,
-          lt: previousRange.endDate,
-        },
-      },
-      _sum: {
-        amount: true,
-      },
-    }),
-  ]);
+    },
+    orderBy: [{ amount: "desc" }, { date: "desc" }],
+  });
+
+  const transactions = transactionCandidates.filter((transaction) =>
+    isTransactionInAccountingPeriod(transaction, startDate, endDate),
+  );
+  const previousExpenses = transactionCandidates.filter(
+    (transaction) =>
+      transaction.type === TransactionType.EXPENSE &&
+      isTransactionInAccountingPeriod(
+        transaction,
+        previousRange.startDate,
+        previousRange.endDate,
+      ),
+  );
 
   const expenses = transactions.filter(
     (transaction) => transaction.type === TransactionType.EXPENSE,
@@ -167,12 +176,15 @@ export async function getMonthlyReport(
       id: transaction.id,
       description: transaction.description ?? "Gasto sem descrição",
       amount: decimalToNumber(transaction.amount),
-      date: transaction.date.toISOString().slice(0, 10),
+      date: getTransactionAccountingDate(transaction).toISOString().slice(0, 10),
       categoryName: transaction.category?.name ?? "Sem categoria",
     }));
 
   const previousMonthExpenses = roundMoney(
-    decimalToNumber(previousExpensesAggregate._sum.amount),
+    previousExpenses.reduce(
+      (sum, transaction) => sum + decimalToNumber(transaction.amount),
+      0,
+    ),
   );
   const differenceAmount = roundMoney(totalExpenses - previousMonthExpenses);
   const differencePercentage =

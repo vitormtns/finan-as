@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { calculateMonthlyCashFlow } from "./cash-flow";
+import {
+  calculateMonthlyCashFlow,
+  sumCurrentCardInvoices,
+} from "./cash-flow";
 
 test("calcula o saldo depois dos gastos e das contas pendentes", () => {
   const result = calculateMonthlyCashFlow({
@@ -43,4 +46,13 @@ test("inclui faturas de cartão nas contas a pagar sem contar a compra duas veze
     totalCommitted: 3_500,
     balanceAfterCommitments: 2_500,
   });
+});
+
+test("soma somente a fatura vigente dos cartões", () => {
+  const total = sumCurrentCardInvoices([
+    { currentInvoiceTotal: 750, nextInvoiceTotal: 400 },
+    { currentInvoiceTotal: 250, nextInvoiceTotal: 900 },
+  ]);
+
+  assert.equal(total, 1_000);
 });

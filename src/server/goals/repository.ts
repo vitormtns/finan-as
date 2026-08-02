@@ -1,5 +1,9 @@
 import { TransactionType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import {
+  getAccountingQueryStart,
+  isTransactionInAccountingPeriod,
+} from "@/server/transactions/accounting-date";
 import { ensureProfile } from "@/server/transactions/repository";
 
 export async function getGoalsRawData(
@@ -10,7 +14,7 @@ export async function getGoalsRawData(
   const startDate = new Date(year, month - 1, 1);
   const endDate = new Date(year, month, 1);
 
-  const [budget, categoryBudgets, categories, transactions] =
+  const [budget, categoryBudgets, categories, transactionCandidates] =
     await Promise.all([
       prisma.budget.findUnique({
         where: {
@@ -42,16 +46,32 @@ export async function getGoalsRawData(
           userId,
           type: TransactionType.EXPENSE,
           date: {
-            gte: startDate,
+            gte: getAccountingQueryStart(startDate),
             lt: endDate,
           },
         },
         select: {
           categoryId: true,
           amount: true,
+          date: true,
+          paymentMethod: true,
+          card: {
+            select: {
+              closingDay: true,
+              dueDay: true,
+            },
+          },
         },
       }),
     ]);
+  const transactions = transactionCandidates
+    .filter((transaction) =>
+      isTransactionInAccountingPeriod(transaction, startDate, endDate),
+    )
+    .map((transaction) => ({
+      categoryId: transaction.categoryId,
+      amount: transaction.amount,
+    }));
 
   return { budget, categoryBudgets, categories, transactions };
 }

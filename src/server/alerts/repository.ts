@@ -1,5 +1,9 @@
 import { PaymentMethod, TransactionType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import {
+  getAccountingQueryStart,
+  isTransactionInAccountingPeriod,
+} from "@/server/transactions/accounting-date";
 
 export async function listCategoryBudgetUsages(
   userId: string,
@@ -28,20 +32,31 @@ export async function listCategoryBudgetUsages(
         userId,
         type: TransactionType.EXPENSE,
         date: {
-          gte: startDate,
+          gte: getAccountingQueryStart(startDate),
           lt: endDate,
         },
       },
       select: {
         categoryId: true,
         amount: true,
+        date: true,
+        paymentMethod: true,
+        card: {
+          select: {
+            closingDay: true,
+            dueDay: true,
+          },
+        },
       },
     }),
   ]);
   const spentByCategory = new Map<string, number>();
 
   for (const transaction of transactions) {
-    if (!transaction.categoryId) {
+    if (
+      !transaction.categoryId ||
+      !isTransactionInAccountingPeriod(transaction, startDate, endDate)
+    ) {
       continue;
     }
 
@@ -72,21 +87,33 @@ export async function getWeeklyExpenses(
   const endDate = new Date(date);
   endDate.setHours(23, 59, 59, 999);
 
-  const aggregate = await prisma.transaction.aggregate({
+  const transactions = await prisma.transaction.findMany({
     where: {
       userId,
       type: TransactionType.EXPENSE,
       date: {
-        gte: startDate,
+        gte: getAccountingQueryStart(startDate),
         lte: endDate,
       },
     },
-    _sum: {
+    select: {
       amount: true,
+      date: true,
+      paymentMethod: true,
+      card: {
+        select: {
+          closingDay: true,
+          dueDay: true,
+        },
+      },
     },
   });
 
-  return Number(aggregate._sum.amount ?? 0);
+  return transactions
+    .filter((transaction) =>
+      isTransactionInAccountingPeriod(transaction, startDate, endDate),
+    )
+    .reduce((sum, transaction) => sum + Number(transaction.amount), 0);
 }
 
 export async function listCardLimitUsages(
@@ -109,12 +136,14 @@ export async function listCardLimitUsages(
           userId,
           paymentMethod: PaymentMethod.CREDIT,
           date: {
-            gte: startDate,
+            gte: getAccountingQueryStart(startDate),
             lt: endDate,
           },
         },
         select: {
           amount: true,
+          date: true,
+          paymentMethod: true,
         },
       },
     },
@@ -126,7 +155,20 @@ export async function listCardLimitUsages(
       cardId: card.id,
       cardName: card.name,
       usedAmount: card.transactions.reduce(
-        (sum, transaction) => sum + Number(transaction.amount),
+        (sum, transaction) =>
+          isTransactionInAccountingPeriod(
+            {
+              ...transaction,
+              card: {
+                closingDay: card.closingDay,
+                dueDay: card.dueDay,
+              },
+            },
+            startDate,
+            endDate,
+          )
+            ? sum + Number(transaction.amount)
+            : sum,
         0,
       ),
       limitAmount: Number(card.limitAmount),

@@ -169,9 +169,18 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
                       </div>
                     </div>
                     <p className="mt-3 text-xs text-[var(--app-ink-muted)]">
+                      {transaction.paymentMethod === "CREDIT"
+                        ? "Fechamento em "
+                        : ""}
                       {new Intl.DateTimeFormat("pt-BR").format(
                         new Date(`${transaction.date}T00:00:00`),
                       )}
+                      {transaction.paymentMethod === "CREDIT" &&
+                      transaction.originalDate !== transaction.date
+                        ? ` • Compra em ${new Intl.DateTimeFormat("pt-BR").format(
+                            new Date(`${transaction.originalDate}T00:00:00`),
+                          )}`
+                        : ""}
                       {transaction.isInstallment &&
                       transaction.installmentNumber &&
                       transaction.totalInstallments

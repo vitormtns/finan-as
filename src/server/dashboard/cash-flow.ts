@@ -9,6 +9,14 @@ function roundMoney(value: number) {
   return Math.round(value * 100) / 100;
 }
 
+export function sumCurrentCardInvoices(
+  cards: { currentInvoiceTotal: number; nextInvoiceTotal?: number }[],
+) {
+  return roundMoney(
+    cards.reduce((sum, card) => sum + card.currentInvoiceTotal, 0),
+  );
+}
+
 export function calculateMonthlyCashFlow(input: MonthlyCashFlowInput) {
   const balanceAfterExpenses = roundMoney(
     input.totalIncome - input.paidExpensesTotal,

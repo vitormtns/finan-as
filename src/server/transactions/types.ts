@@ -35,6 +35,7 @@ export type TransactionListItem = {
   type: TransactionType;
   paymentMethod: PaymentMethod;
   date: string;
+  originalDate: string;
   categoryName: string;
   categoryColor: string | null;
   cardName: string | null;
