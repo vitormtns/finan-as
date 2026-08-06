@@ -69,7 +69,7 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
 
   return (
     <div className="app-shell">
-      <main className="mx-auto flex w-full max-w-5xl flex-col gap-5 px-4 py-4 sm:px-6 md:py-7">
+      <main className="flex w-full max-w-none flex-col gap-5 px-3 py-4 sm:px-5 md:py-7 lg:px-6 xl:px-8">
         <section className="relative overflow-hidden rounded-[2rem] border border-white/70 bg-[linear-gradient(145deg,#fffdf8,#edf4ee)] p-5 shadow-[0_28px_70px_rgb(16_25_35_/_0.1)]">
           <div className="pointer-events-none absolute -right-16 -top-20 size-56 rounded-full bg-emerald-200/40 blur-3xl" />
           <div className="relative grid gap-5 md:grid-cols-[1fr_0.72fr] md:items-end">

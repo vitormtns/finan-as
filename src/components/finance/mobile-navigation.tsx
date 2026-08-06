@@ -61,7 +61,7 @@ export function MobileNavigation() {
   return (
     <>
       <nav
-        className="nav-shell fixed inset-x-0 top-4 z-30 mx-auto hidden w-[calc(100%-2rem)] max-w-6xl items-center justify-between rounded-[1.45rem] px-3 py-2.5 md:flex"
+        className="nav-shell fixed inset-x-5 top-4 z-30 hidden items-center justify-between rounded-[1.45rem] px-3 py-2.5 md:flex lg:inset-x-6 xl:inset-x-8"
         aria-label="Navegação principal"
       >
         <Link
@@ -111,10 +111,10 @@ export function MobileNavigation() {
       </nav>
 
       <nav
-        className="fixed inset-x-0 bottom-0 z-30 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:hidden"
+        className="fixed inset-x-0 bottom-0 z-30 px-2.5 pb-[max(0.65rem,env(safe-area-inset-bottom))] md:hidden"
         aria-label="Navegação principal"
       >
-        <ul className="nav-shell mx-auto grid max-w-md grid-cols-5 items-end rounded-[1.75rem] p-1.5">
+        <ul className="mobile-nav-shell mx-auto grid max-w-lg grid-cols-5 items-end rounded-[2rem] px-1.5 pb-1.5 pt-2">
           {mobileItems.slice(0, 2).map((item) => {
             const Icon = item.icon;
             const isActive = isCurrentRoute(pathname, item.href);
@@ -123,15 +123,17 @@ export function MobileNavigation() {
               <li key={item.href}>
                 <Link
                   href={item.href}
-                  className={`nav-item flex min-h-14 flex-col items-center justify-center gap-1 rounded-[1.15rem] text-[0.66rem] font-bold active:scale-95 ${
+                  className={`mobile-nav-item ${
                     isActive
-                      ? "nav-item-active bg-[var(--app-primary)] text-white shadow-[0_10px_24px_rgb(17_25_20_/_0.2)]"
+                      ? "mobile-nav-item-active text-[var(--app-ink)]"
                       : "text-[var(--app-ink-muted)]"
                   }`}
                   aria-current={isActive ? "page" : undefined}
                 >
-                  <Icon size={20} strokeWidth={2.15} aria-hidden="true" />
-                  {item.shortLabel}
+                  <span className="mobile-nav-icon">
+                    <Icon size={19} strokeWidth={2.2} aria-hidden="true" />
+                  </span>
+                  <span>{item.shortLabel}</span>
                 </Link>
               </li>
             );
@@ -140,11 +142,13 @@ export function MobileNavigation() {
           <li className="flex justify-center">
             <Link
               href="/novo?tipo=despesa"
-              className="-mt-7 flex size-16 flex-col items-center justify-center rounded-[1.35rem] bg-[var(--app-primary)] text-white shadow-[0_18px_38px_rgb(17_25_20_/_0.34)] transition hover:-translate-y-1 active:scale-95"
+              className="mobile-nav-create"
               aria-label="Registrar movimentação"
             >
-              <Plus size={26} strokeWidth={2.35} aria-hidden="true" />
-              <span className="mt-0.5 text-[0.62rem] font-bold">Registrar</span>
+              <span className="mobile-nav-create-icon">
+                <Plus size={25} strokeWidth={2.5} aria-hidden="true" />
+              </span>
+              <span className="text-[0.62rem] font-extrabold tracking-[-0.01em]">Registrar</span>
             </Link>
           </li>
 
@@ -156,15 +160,17 @@ export function MobileNavigation() {
               <li key={item.href}>
                 <Link
                   href={item.href}
-                  className={`nav-item flex min-h-14 flex-col items-center justify-center gap-1 rounded-[1.15rem] text-[0.66rem] font-bold active:scale-95 ${
+                  className={`mobile-nav-item ${
                     isActive
-                      ? "nav-item-active bg-[var(--app-primary)] text-white shadow-[0_10px_24px_rgb(17_25_20_/_0.2)]"
+                      ? "mobile-nav-item-active text-[var(--app-ink)]"
                       : "text-[var(--app-ink-muted)]"
                   }`}
                   aria-current={isActive ? "page" : undefined}
                 >
-                  <Icon size={20} strokeWidth={2.15} aria-hidden="true" />
-                  {item.shortLabel}
+                  <span className="mobile-nav-icon">
+                    <Icon size={19} strokeWidth={2.2} aria-hidden="true" />
+                  </span>
+                  <span>{item.shortLabel}</span>
                 </Link>
               </li>
             );

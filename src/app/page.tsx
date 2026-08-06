@@ -51,7 +51,7 @@ export default async function Home() {
 
   return (
     <div className="app-shell">
-      <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-5 sm:px-6 md:py-8 lg:px-8">
+      <main className="flex w-full max-w-none flex-col gap-8 px-3 py-5 sm:px-5 md:py-8 lg:px-6 xl:px-8">
         <header className="flex items-center justify-between md:hidden">
           <div>
             <p className="text-xs font-extrabold uppercase tracking-[0.1em] text-[var(--app-ink-faint)]">
@@ -211,6 +211,9 @@ export default async function Home() {
               <WeeklySummaryCard summary={dashboard.weeklySummary} />
               <MonthProjectionCard
                 dailyAverage={dashboard.dailyAverage}
+                historicalAverage={dashboard.historicalAverage}
+                historicalMonthsUsed={dashboard.historicalMonthsUsed}
+                projectionConfidence={dashboard.projectionConfidence}
                 projectedMonthTotal={dashboard.projectedMonthTotal}
                 projectedBudgetDifference={dashboard.projectedBudgetDifference}
               />

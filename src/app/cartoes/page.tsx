@@ -66,7 +66,7 @@ export default async function CardsPage({ searchParams }: CardsPageProps) {
 
   return (
     <div className="app-shell">
-      <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-5 sm:px-6 md:py-8 lg:px-8">
+      <main className="flex w-full max-w-none flex-col gap-8 px-3 py-5 sm:px-5 md:py-8 lg:px-6 xl:px-8">
         <header className="card-reveal relative overflow-hidden rounded-[2rem] bg-[var(--app-primary)] p-6 text-white shadow-[0_30px_80px_rgb(20_23_21_/_0.22)] sm:p-8">
           <div className="pointer-events-none absolute -right-20 -top-24 size-80 rounded-full bg-[#4b806a]/45 blur-3xl" />
           <div className="relative grid gap-8 lg:grid-cols-[1fr_0.7fr] lg:items-end">
@@ -174,7 +174,7 @@ export default async function CardsPage({ searchParams }: CardsPageProps) {
                   </p>
                 </div>
               ) : (
-                <div className="grid gap-5 lg:grid-cols-2">
+                <div className="grid gap-5 lg:grid-cols-2 2xl:grid-cols-3">
                   {data.cards.map((card, index) => {
                     const cardColor = card.color ?? "#315f52";
                     const progress = card.usedPercentage ?? 0;

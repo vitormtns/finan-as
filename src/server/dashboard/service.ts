@@ -12,6 +12,7 @@ import {
   calculateMonthlyCashFlow,
   sumCurrentCardInvoices,
 } from "./cash-flow";
+import { calculateMonthlyProjection } from "./projection";
 import type {
   DailySpendingAllowance,
   DashboardCategory,
@@ -35,6 +36,24 @@ function getCurrentMonthReference(date = new Date()) {
     startDate: new Date(year, month - 1, 1),
     endDate: new Date(year, month, 1),
   };
+}
+
+function getPreviousCompleteMonthRanges(date: Date, count = 3) {
+  return Array.from({ length: count }, (_, index) => {
+    const monthsAgo = count - index;
+    const startDate = new Date(
+      date.getFullYear(),
+      date.getMonth() - monthsAgo,
+      1,
+    );
+    const endDate = new Date(
+      startDate.getFullYear(),
+      startDate.getMonth() + 1,
+      1,
+    );
+
+    return { startDate, endDate };
+  });
 }
 
 function decimalToNumber(value: { toString: () => string } | number | null) {
@@ -246,10 +265,22 @@ function createOrientation(params: {
   }
 
   if (projectedBudgetDifference !== null && projectedBudgetDifference > 0) {
+    const meaningfulDifference = Math.max(budgetLimit * 0.05, 100);
+
+    if (projectedBudgetDifference <= meaningfulDifference) {
+      return {
+        status: "Próximo da meta",
+        title: "Seu mês está bem equilibrado",
+        description:
+          "A estimativa está próxima da meta e ainda pode variar com os próximos lançamentos.",
+        tone: "success",
+      };
+    }
+
     return {
       status: "Atenção",
-      title: "Seu ritmo pode passar da meta",
-      description: `Nesse ritmo, você pode fechar o mês ${formatCurrency(projectedBudgetDifference)} acima da meta.`,
+      title: "A tendência indica atenção",
+      description: `Com base no histórico e no ritmo atual, o mês pode fechar ${formatCurrency(projectedBudgetDifference)} acima da meta.`,
       tone: "warning",
     };
   }
@@ -277,6 +308,7 @@ export async function getMonthlyDashboard(
   date = new Date(),
 ): Promise<MonthlyDashboard> {
   const reference = getCurrentMonthReference(date);
+  const historicalMonthRanges = getPreviousCompleteMonthRanges(date);
   const currentWeekStartDate = getStartOfWeek(date);
   const currentWeekEndDate = addDays(date, 1);
   currentWeekEndDate.setHours(0, 0, 0, 0);
@@ -299,6 +331,7 @@ export async function getMonthlyDashboard(
     budget,
     futureFixedExpenses,
     weeklyTransactions,
+    historicalTransactions,
     cardsPageData,
   ] = await Promise.all([
     prisma.transaction.findMany({
@@ -355,6 +388,29 @@ export async function getMonthlyDashboard(
             color: true,
           },
         },
+        card: {
+          select: {
+            closingDay: true,
+            dueDay: true,
+          },
+        },
+      },
+    }),
+    prisma.transaction.findMany({
+      where: {
+        userId,
+        type: TransactionType.EXPENSE,
+        date: {
+          gte: getAccountingQueryStart(
+            historicalMonthRanges[0].startDate,
+          ),
+          lt: reference.startDate,
+        },
+      },
+      select: {
+        amount: true,
+        date: true,
+        paymentMethod: true,
         card: {
           select: {
             closingDay: true,
@@ -490,8 +546,29 @@ export async function getMonthlyDashboard(
     previousWeekTransactions,
     elapsedDaysInWeek,
   });
-  const dailyAverage = roundMoney(totalExpenses / reference.currentDay);
-  const projectedMonthTotal = roundMoney(dailyAverage * reference.daysInMonth);
+  const historicalMonthlyExpenses = historicalMonthRanges.map(
+    ({ startDate, endDate }) =>
+      roundMoney(
+        historicalTransactions
+          .filter((transaction) =>
+            isTransactionInAccountingPeriod(transaction, startDate, endDate),
+          )
+          .reduce(
+            (sum, transaction) =>
+              sum + decimalToNumber(transaction.amount),
+            0,
+          ),
+      ),
+  );
+  const projection = calculateMonthlyProjection({
+    currentExpenses: totalExpenses,
+    currentDay: reference.currentDay,
+    daysInMonth: reference.daysInMonth,
+    historicalMonthlyExpenses,
+    knownRemainingExpenses: remainingFixedExpensesTotal,
+  });
+  const dailyAverage = projection.dailyAverage;
+  const projectedMonthTotal = projection.projectedMonthTotal;
   const projectedBudgetDifference =
     budgetLimit === null ? null : roundMoney(projectedMonthTotal - budgetLimit);
   const orientation = createOrientation({
@@ -527,6 +604,9 @@ export async function getMonthlyDashboard(
     overdueFixedExpensesTotal,
     weeklySummary,
     dailyAverage,
+    historicalAverage: projection.historicalAverage,
+    historicalMonthsUsed: projection.historicalMonthsUsed,
+    projectionConfidence: projection.confidence,
     projectedMonthTotal,
     projectedBudgetDifference,
     orientation,

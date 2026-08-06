@@ -65,6 +65,9 @@ export type MonthlyDashboard = {
   overdueFixedExpensesTotal: number;
   weeklySummary: WeeklySummary;
   dailyAverage: number;
+  historicalAverage: number | null;
+  historicalMonthsUsed: number;
+  projectionConfidence: "learning" | "medium" | "high";
   projectedMonthTotal: number;
   projectedBudgetDifference: number | null;
   orientation: DashboardOrientation;

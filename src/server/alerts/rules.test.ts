@@ -40,6 +40,16 @@ test("gera alerta positivo quando o gasto está abaixo da meta proporcional", ()
   assert.equal(alerts.some((alert) => alert.type === "positive_pace"), true);
 });
 
+test("não alerta por uma diferença projetada pequena", () => {
+  const alerts = generateFinancialAlertRules({
+    ...baseInput,
+    projectedMonthTotal: 3_050,
+    projectedBudgetDifference: 50,
+  });
+
+  assert.equal(alerts.some((alert) => alert.type === "monthly_pace"), false);
+});
+
 test("gera estouro de categoria acima de 100%", () => {
   const alerts = generateFinancialAlertRules({
     ...baseInput,

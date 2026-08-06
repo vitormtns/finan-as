@@ -63,7 +63,7 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
 
   return (
     <div className="app-shell">
-      <main className="mx-auto flex w-full max-w-6xl flex-col gap-5 px-4 py-5 sm:px-6 md:py-8">
+      <main className="flex w-full max-w-none flex-col gap-5 px-3 py-5 sm:px-5 md:py-8 lg:px-6 xl:px-8">
         <header className="premium-page-hero">
           <div className="relative">
           <div className="app-kicker">

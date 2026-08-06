@@ -21,12 +21,13 @@ export function generateFinancialAlertRules(
   if (
     input.budgetLimit !== null &&
     input.projectedBudgetDifference !== null &&
-    input.projectedBudgetDifference > 0
+    input.projectedBudgetDifference >
+      Math.max(input.budgetLimit * 0.05, 100)
   ) {
     addAlert(alerts, {
       type: "monthly_pace",
       title: "Ritmo acima da meta",
-      message: `Neste ritmo, você pode fechar o mês ${formatCurrency(input.projectedBudgetDifference)} acima da meta.`,
+      message: `Com base no histórico e no ritmo atual, o mês pode fechar ${formatCurrency(input.projectedBudgetDifference)} acima da meta.`,
       severity: "warning",
       priority: 90,
     });

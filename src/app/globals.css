@@ -191,6 +191,117 @@ textarea {
     content: "";
   }
 
+  .mobile-nav-shell {
+    position: relative;
+    border: 1px solid rgb(255 255 255 / 0.78);
+    background:
+      linear-gradient(180deg, rgb(255 255 255 / 0.84), rgb(241 239 232 / 0.92));
+    box-shadow:
+      0 24px 65px rgb(17 25 20 / 0.2),
+      inset 0 1px 0 rgb(255 255 255 / 0.96);
+    backdrop-filter: blur(30px) saturate(1.35);
+  }
+
+  .mobile-nav-shell::before {
+    position: absolute;
+    inset: 0.35rem 22% auto;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.95), transparent);
+    content: "";
+  }
+
+  .mobile-nav-item {
+    position: relative;
+    display: flex;
+    min-height: 4rem;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.2rem;
+    border-radius: 1.3rem;
+    font-size: 0.64rem;
+    font-weight: 750;
+    transition:
+      color 180ms ease,
+      transform 180ms ease;
+  }
+
+  .mobile-nav-item:active {
+    transform: scale(0.94);
+  }
+
+  .mobile-nav-icon {
+    display: grid;
+    width: 2.15rem;
+    height: 2.15rem;
+    place-items: center;
+    border-radius: 0.85rem;
+    transition:
+      color 220ms ease,
+      background-color 220ms ease,
+      transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 220ms ease;
+  }
+
+  .mobile-nav-item-active .mobile-nav-icon {
+    background: var(--app-primary);
+    color: white;
+    box-shadow: 0 9px 20px rgb(17 25 20 / 0.22);
+    transform: translateY(-0.1rem);
+  }
+
+  .mobile-nav-item-active::after {
+    position: absolute;
+    bottom: 0.18rem;
+    width: 0.26rem;
+    height: 0.26rem;
+    border-radius: 999px;
+    background: var(--app-accent);
+    box-shadow: 0 0 10px rgb(22 138 88 / 0.6);
+    content: "";
+  }
+
+  .mobile-nav-create {
+    display: flex;
+    min-width: 4.5rem;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.18rem;
+    color: var(--app-primary);
+    transition: transform 180ms ease;
+  }
+
+  .mobile-nav-create:active {
+    transform: scale(0.94);
+  }
+
+  .mobile-nav-create-icon {
+    display: grid;
+    width: 4.15rem;
+    height: 4.15rem;
+    margin-top: -2rem;
+    place-items: center;
+    border: 0.38rem solid #eeece4;
+    border-radius: 1.55rem;
+    background:
+      radial-gradient(circle at 68% 22%, rgb(68 212 140 / 0.42), transparent 36%),
+      var(--app-primary);
+    color: white;
+    box-shadow:
+      0 18px 36px rgb(17 25 20 / 0.34),
+      inset 0 1px 0 rgb(255 255 255 / 0.12);
+    transition:
+      transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 220ms ease;
+  }
+
+  .mobile-nav-create:hover .mobile-nav-create-icon {
+    box-shadow:
+      0 22px 42px rgb(17 25 20 / 0.38),
+      0 0 28px rgb(68 212 140 / 0.18);
+    transform: translateY(-0.16rem) rotate(2deg);
+  }
+
   .app-kicker {
     display: inline-flex;
     align-items: center;
