@@ -61,8 +61,8 @@ export default async function CategoriesPage({
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,#dbeafe_0,#f8fafc_34rem)] pb-28 md:pb-0">
-      <main className="flex w-full max-w-none flex-col gap-5 px-3 py-5 sm:px-5 md:py-8 lg:px-6 xl:px-8">
-        <header>
+      <main className="flex w-full max-w-none flex-col gap-5 px-0 py-5 sm:px-5 md:py-8 lg:px-6 xl:px-8">
+        <header className="px-4 sm:px-0">
           <div className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-white/80 px-3 py-1 text-sm font-medium text-blue-700 shadow-sm shadow-blue-100/70">
             <Layers3 size={16} aria-hidden="true" />
             Organização

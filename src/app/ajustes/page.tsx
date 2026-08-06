@@ -102,7 +102,7 @@ export default async function SettingsPage({ searchParams }: SettingsPageProps) 
 
   return (
     <div className="app-shell">
-      <main className="flex w-full max-w-none flex-col gap-5 px-3 py-5 sm:px-5 md:py-8 lg:px-6 xl:px-8">
+      <main className="flex w-full max-w-none flex-col gap-5 px-0 py-5 sm:px-5 md:py-8 lg:px-6 xl:px-8">
         <header className="premium-page-hero">
           <div className="relative flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
