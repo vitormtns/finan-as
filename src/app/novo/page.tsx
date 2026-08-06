@@ -88,9 +88,10 @@ export default async function NewTransactionPage({
 
   return (
     <div className="app-shell">
-      <main className="mx-auto flex w-full max-w-2xl flex-col gap-5 px-4 py-5 sm:px-6 md:py-8">
+      <main className="mx-auto flex w-full max-w-6xl flex-col gap-5 px-4 py-5 sm:px-6 md:py-8 lg:px-8">
         <header className="premium-page-hero">
-          <div className="relative">
+          <div className="relative grid gap-5 lg:grid-cols-[0.72fr_1.28fr] lg:items-end">
+          <div>
           <Link
             href={returnHref ?? "/gastos"}
             className="inline-flex items-center gap-2 rounded-full bg-white/70 px-3 py-2 text-sm font-bold text-[var(--app-primary)] shadow-sm transition hover:bg-white"
@@ -98,7 +99,8 @@ export default async function NewTransactionPage({
             <ArrowLeft size={17} aria-hidden="true" />
             {returnHref ? "Voltar para a fatura" : "Voltar para movimentos"}
           </Link>
-
+          </div>
+          <div>
           <h1 className="mt-5 app-title">
             {isEditing
               ? `Editar ${transactionLabel}`
@@ -111,6 +113,7 @@ export default async function NewTransactionPage({
               ? "Revise os dados copiados e salve para confirmar o novo gasto."
               : "Registre uma movimentação em poucos campos e mantenha o mês em dia."}
           </p>
+          </div>
           </div>
         </header>
 

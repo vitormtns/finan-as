@@ -73,6 +73,8 @@ export type TransactionFormOptions = {
     id: string;
     name: string;
     color: string | null;
+    closingDay: number | null;
+    dueDay: number | null;
   }[];
 };
 

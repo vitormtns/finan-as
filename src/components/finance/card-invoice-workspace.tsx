@@ -117,18 +117,35 @@ export function CardInvoiceWorkspace({
         </div>
       </div>
 
-      <div className="grid gap-3 border-b border-black/[0.06] bg-black/[0.018] px-5 py-4 text-sm text-[var(--app-ink-muted)] sm:grid-cols-3 sm:px-6">
-        <span className="inline-flex items-center gap-2">
-          <CalendarDays size={16} aria-hidden="true" />
-          Fechamento em {formatDate(invoice.closingDate)}
-        </span>
-        <span className="inline-flex items-center gap-2">
-          <ReceiptText size={16} aria-hidden="true" />
-          Vence em {formatDate(invoice.dueDate)}
-        </span>
-        <span className="sm:text-right">
-          {invoice.installmentCount} parcela{invoice.installmentCount === 1 ? "" : "s"} nesta fatura
-        </span>
+      <div className="border-b border-black/[0.06] bg-black/[0.018] px-5 py-5 sm:px-6">
+        <div className="relative grid grid-cols-3 gap-3">
+          <span className="flow-line absolute left-[12%] right-[12%] top-3.5 h-px origin-left bg-[linear-gradient(90deg,var(--app-accent),var(--app-warning))]" />
+          {[
+            ["Início do ciclo", invoice.periodStart, "bg-[var(--app-accent)]"],
+            ["Fechamento", invoice.closingDate, "bg-[var(--app-primary)]"],
+            ["Vencimento", invoice.dueDate, "bg-[var(--app-warning)]"],
+          ].map(([label, date, tone]) => (
+            <div key={String(label)} className="relative text-center">
+              <span className={`relative mx-auto block size-7 rounded-full border-[7px] border-[#f0f0ea] shadow-sm ${tone}`} />
+              <span className="mt-2 block text-[0.64rem] font-extrabold uppercase tracking-[0.09em] text-[var(--app-ink-faint)]">
+                {label}
+              </span>
+              <strong className="mt-1 block text-xs font-extrabold text-[var(--app-ink)] sm:text-sm">
+                {formatDate(String(date))}
+              </strong>
+            </div>
+          ))}
+        </div>
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-white/60 px-4 py-3 text-xs text-[var(--app-ink-muted)]">
+          <span className="inline-flex items-center gap-2">
+            <CalendarDays size={15} aria-hidden="true" />
+            Compras feitas até o fechamento entram neste vencimento.
+          </span>
+          <span className="inline-flex items-center gap-2 font-bold text-[var(--app-ink)]">
+            <ReceiptText size={15} aria-hidden="true" />
+            {invoice.installmentCount} parcela{invoice.installmentCount === 1 ? "" : "s"}
+          </span>
+        </div>
       </div>
 
       <div className="p-3 sm:p-4">

@@ -32,7 +32,13 @@ export async function listTransactionFormOptions(
     prisma.card.findMany({
       where: { userId },
       orderBy: { name: "asc" },
-      select: { id: true, name: true, color: true },
+      select: {
+        id: true,
+        name: true,
+        color: true,
+        closingDay: true,
+        dueDay: true,
+      },
     }),
   ]);
 

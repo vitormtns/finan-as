@@ -13,9 +13,15 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const metadataBase = new URL(
+  process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
+);
+
 export const metadata: Metadata = {
+  metadataBase,
   title: "Meu Mês",
-  description: "Painel pessoal para controle de gastos mensais.",
+  description:
+    "Seu dinheiro, em movimento. Acompanhe gastos, cartões, metas e o ritmo do mês em uma experiência financeira visual.",
   manifest: "/manifest.json",
   applicationName: "Meu Mês",
   icons: {
@@ -33,6 +39,26 @@ export const metadata: Metadata = {
     capable: true,
     statusBarStyle: "black-translucent",
     title: "Meu Mês",
+  },
+  openGraph: {
+    type: "website",
+    locale: "pt_BR",
+    title: "Meu Mês",
+    description: "Seu dinheiro, em movimento.",
+    images: [
+      {
+        url: "/og.png",
+        width: 1748,
+        height: 909,
+        alt: "Meu Mês — Seu dinheiro, em movimento.",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Meu Mês",
+    description: "Seu dinheiro, em movimento.",
+    images: ["/og.png"],
   },
 };
 

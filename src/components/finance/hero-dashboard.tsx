@@ -3,11 +3,13 @@ import {
   ArrowRight,
   CalendarDays,
   CircleAlert,
+  Gauge,
   ReceiptText,
   Sparkles,
 } from "lucide-react";
 import { formatCurrency } from "@/lib/formatters";
 import type { MonthlyDashboard } from "@/server/dashboard/types";
+import { AnimatedCurrency } from "./animated-currency";
 
 type HeroDashboardProps = {
   currentMonth: string;
@@ -15,7 +17,7 @@ type HeroDashboardProps = {
 };
 
 const toneClasses = {
-  info: "bg-white/10 text-white/80",
+  info: "bg-white/10 text-white/76",
   success: "bg-[#b9f6d2] text-[#123d28]",
   warning: "bg-[#ffe8a8] text-[#624500]",
   danger: "bg-[#ffd2cb] text-[#70251b]",
@@ -27,55 +29,34 @@ function getCashFlowStatus(dashboard: MonthlyDashboard) {
   }
 
   if (dashboard.balanceAfterCommitments < 0) {
-    return { label: "Falta cobrir parte do mês", tone: "danger" as const };
+    return { label: "Atenção ao fluxo", tone: "danger" as const };
   }
 
   if (dashboard.overdueFixedExpensesTotal > 0) {
     return { label: "Há contas vencidas", tone: "warning" as const };
   }
 
-  if (dashboard.outstandingBillsTotal === 0) {
-    return { label: "Nenhuma conta pendente", tone: "success" as const };
-  }
-
-  return { label: "Fluxo do mês positivo", tone: "success" as const };
+  return { label: "Fluxo sob controle", tone: "success" as const };
 }
 
 function getCashFlowMessage(dashboard: MonthlyDashboard) {
-  if (dashboard.outstandingBillsTotal === 0) {
-    return "Nenhuma conta está pendente. O saldo considera o que entrou e os pagamentos já realizados.";
-  }
-
-  return `São ${formatCurrency(dashboard.remainingFixedExpensesTotal)} em contas fixas e ${formatCurrency(dashboard.cardInvoicesTotal)} na fatura vigente.`;
-}
-
-function getCashFlowInsight(dashboard: MonthlyDashboard) {
   if (dashboard.totalIncome === 0) {
-    return {
-      title: "Registre o que entrou no mês",
-      message:
-        "As entradas são necessárias para calcular quanto sobra depois dos gastos e das contas pendentes.",
-    };
+    return "Registre suas entradas para enxergar como o dinheiro atravessa o mês.";
   }
 
   if (dashboard.balanceAfterCommitments < 0) {
-    return {
-      title: "As entradas ainda não cobrem tudo",
-      message: `Faltam ${formatCurrency(Math.abs(dashboard.balanceAfterCommitments))} para cobrir os gastos registrados e as contas que ainda vencem.`,
-    };
+    return `Ainda faltam ${formatCurrency(Math.abs(dashboard.balanceAfterCommitments))} para cobrir todos os compromissos.`;
   }
 
-  if (dashboard.outstandingBillsTotal === 0) {
-    return {
-      title: "Não há mais contas a pagar",
-      message: `Depois dos pagamentos realizados, seu saldo atual é ${formatCurrency(dashboard.balanceAfterExpenses)}.`,
-    };
+  return `Depois de tudo, a previsão é preservar ${formatCurrency(dashboard.balanceAfterCommitments)}.`;
+}
+
+function getFlowPercentage(value: number, total: number) {
+  if (value <= 0 || total <= 0) {
+    return 0;
   }
 
-  return {
-    title: "As contas previstas cabem nas entradas",
-    message: `Depois de pagar tudo, a previsão é ficar com ${formatCurrency(dashboard.balanceAfterCommitments)}.`,
-  };
+  return Math.max(Math.min((value / total) * 100, 100), 6);
 }
 
 export function HeroDashboard({
@@ -83,21 +64,39 @@ export function HeroDashboard({
   dashboard,
 }: HeroDashboardProps) {
   const status = getCashFlowStatus(dashboard);
-  const commitmentPercentage =
-    dashboard.totalIncome > 0
-      ? Math.round((dashboard.totalCommitted / dashboard.totalIncome) * 100)
-      : null;
-  const insight = getCashFlowInsight(dashboard);
+  const monthProgress = Math.min(
+    Math.round((dashboard.currentDay / dashboard.daysInMonth) * 100),
+    100,
+  );
+  const incomeReference = Math.max(
+    dashboard.totalIncome,
+    dashboard.totalCommitted,
+    1,
+  );
+  const paidPercentage = getFlowPercentage(
+    dashboard.paidExpensesTotal,
+    incomeReference,
+  );
+  const pendingPercentage = getFlowPercentage(
+    dashboard.outstandingBillsTotal,
+    incomeReference,
+  );
+  const freePercentage = getFlowPercentage(
+    Math.max(dashboard.balanceAfterCommitments, 0),
+    incomeReference,
+  );
+  const safeDailyAmount = dashboard.dailySpendingAllowance.safeDailyAmount;
 
   return (
-    <section className="grid gap-4 lg:grid-cols-[1.42fr_0.58fr]">
-      <article className="relative min-h-[29rem] overflow-hidden rounded-[2rem] bg-[var(--app-primary)] p-5 text-white shadow-[0_28px_80px_rgb(20_23_21_/_0.22)] sm:p-7 lg:min-h-[31rem]">
-        <div className="pointer-events-none absolute -right-24 -top-36 size-[26rem] rounded-full bg-[#4b806a]/45 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-32 -left-20 size-80 rounded-full bg-white/[0.08] blur-3xl" />
+    <section className="relative overflow-hidden rounded-[2.4rem] bg-[var(--app-primary)] text-white shadow-[0_36px_110px_rgb(17_25_20_/_0.26)]">
+      <div className="ambient-orb pointer-events-none absolute -right-28 -top-40 size-[32rem] rounded-full bg-[#2d9e68]/35 blur-[90px]" />
+      <div className="pointer-events-none absolute -bottom-48 -left-32 size-[30rem] rounded-full bg-[#d8f3e4]/10 blur-[100px]" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(120deg,transparent_35%,rgb(255_255_255_/_0.035),transparent_68%)]" />
 
-        <div className="relative flex h-full flex-col justify-between gap-12">
+      <div className="relative grid min-h-[39rem] lg:grid-cols-[1.38fr_0.62fr]">
+        <article className="flex flex-col justify-between gap-10 p-6 sm:p-8 lg:p-10">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <span className="inline-flex items-center gap-2 text-sm font-semibold text-white/65">
+            <span className="inline-flex items-center gap-2 text-sm font-semibold text-white/58">
               <CalendarDays size={16} aria-hidden="true" />
               {currentMonth}
             </span>
@@ -108,123 +107,145 @@ export function HeroDashboard({
             </span>
           </div>
 
-          <div className="max-w-2xl">
-            <p className="text-sm font-semibold text-white/58">
-              Contas a pagar
+          <div className="max-w-4xl py-4">
+            <p className="text-sm font-semibold text-white/52">
+              Compromissos deste mês
             </p>
-            <h1 className="mt-3 text-[clamp(3.25rem,12vw,6.6rem)] font-bold leading-[0.86] tracking-[-0.075em] text-white">
-              {formatCurrency(dashboard.outstandingBillsTotal)}
-            </h1>
-            <p className="mt-6 max-w-xl text-sm leading-6 text-white/65 sm:text-base sm:leading-7">
+            <AnimatedCurrency
+              value={dashboard.outstandingBillsTotal}
+              className="mt-4 block text-[clamp(3.6rem,12vw,8rem)] font-semibold leading-[0.82] tracking-[-0.085em] text-white tabular-nums"
+            />
+            <p className="mt-7 max-w-2xl text-sm leading-6 text-white/62 sm:text-base sm:leading-7">
               {getCashFlowMessage(dashboard)}
             </p>
           </div>
 
-          <div className="grid grid-cols-3 gap-2 border-t border-white/10 pt-5 sm:gap-4">
-            <div>
-              <p className="text-[0.65rem] font-bold uppercase tracking-[0.08em] text-white/42 sm:text-xs">
-                Entrou
-              </p>
-              <strong className="mt-2 block text-sm font-bold sm:text-lg">
-                {formatCurrency(dashboard.totalIncome)}
-              </strong>
+          <div>
+            <div className="mb-4 flex items-center justify-between gap-4">
+              <div>
+                <p className="text-[0.66rem] font-extrabold uppercase tracking-[0.14em] text-white/38">
+                  Caminho do dinheiro
+                </p>
+                <p className="mt-1 text-sm text-white/58">
+                  De tudo que entrou para o que já tem destino.
+                </p>
+              </div>
+              <Sparkles className="text-[#7ee9ae]" size={20} aria-hidden="true" />
             </div>
-            <div>
-              <p className="text-[0.65rem] font-bold uppercase tracking-[0.08em] text-white/42 sm:text-xs">
-                Já saiu
-              </p>
-              <strong className="mt-2 block text-sm font-bold sm:text-lg">
-                {formatCurrency(dashboard.paidExpensesTotal)}
-              </strong>
-            </div>
-            <div>
-              <p className="text-[0.65rem] font-bold uppercase tracking-[0.08em] text-white/42 sm:text-xs">
-                Saldo depois de tudo
-              </p>
-              <strong className="mt-2 block text-sm font-bold sm:text-lg">
-                {formatCurrency(dashboard.balanceAfterCommitments)}
-              </strong>
+
+            <div className="overflow-hidden rounded-[1.4rem] border border-white/10 bg-white/[0.055] p-2.5 backdrop-blur-xl">
+              <div className="flex h-4 gap-1 overflow-hidden rounded-full bg-white/[0.06]">
+                <span
+                  className="flow-line rounded-full bg-[#72e6a5]"
+                  style={{ width: `${paidPercentage}%`, animationDelay: "80ms" }}
+                  title={`Já pago: ${formatCurrency(dashboard.paidExpensesTotal)}`}
+                />
+                <span
+                  className="flow-line rounded-full bg-[#f3c969]"
+                  style={{ width: `${pendingPercentage}%`, animationDelay: "170ms" }}
+                  title={`Pendente: ${formatCurrency(dashboard.outstandingBillsTotal)}`}
+                />
+                <span
+                  className="flow-line rounded-full bg-white/24"
+                  style={{ width: `${freePercentage}%`, animationDelay: "260ms" }}
+                  title={`Livre: ${formatCurrency(Math.max(dashboard.balanceAfterCommitments, 0))}`}
+                />
+              </div>
+
+              <div className="mt-4 grid grid-cols-3 gap-2">
+                {[
+                  ["Já pago", dashboard.paidExpensesTotal, "bg-[#72e6a5]"],
+                  ["A pagar", dashboard.outstandingBillsTotal, "bg-[#f3c969]"],
+                  ["Livre", Math.max(dashboard.balanceAfterCommitments, 0), "bg-white/35"],
+                ].map(([label, value, color]) => (
+                  <div key={String(label)} className="min-w-0 rounded-2xl bg-white/[0.045] p-3">
+                    <span className={`mb-2 block size-1.5 rounded-full ${color}`} />
+                    <p className="truncate text-[0.65rem] font-bold uppercase tracking-[0.08em] text-white/38">
+                      {label}
+                    </p>
+                    <strong className="mt-1 block truncate text-xs font-bold text-white/82 sm:text-sm">
+                      {formatCurrency(Number(value))}
+                    </strong>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
-      </article>
+        </article>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
-        <article className="app-card flex min-h-64 flex-col justify-between p-5 sm:p-6">
-          <div className="flex items-start justify-between gap-3">
-            <span className="flex size-11 items-center justify-center rounded-2xl bg-[var(--app-primary-soft)] text-[var(--app-primary)]">
-              <Sparkles size={20} strokeWidth={2.15} aria-hidden="true" />
-            </span>
-            {commitmentPercentage !== null ? (
+        <aside className="m-2 mt-0 flex flex-col gap-2 rounded-[2rem] bg-[#f1efe7] p-3 text-[var(--app-ink)] sm:m-3 sm:mt-0 sm:p-4 lg:m-3 lg:ml-0">
+          <article className="relative flex flex-1 flex-col justify-between overflow-hidden rounded-[1.55rem] bg-[var(--app-surface)] p-5 shadow-sm sm:p-6">
+            <div className="absolute -right-14 -top-14 size-44 rounded-full bg-[var(--app-accent-soft)] blur-3xl" />
+            <div className="relative flex items-start justify-between gap-4">
+              <span className="flex size-11 items-center justify-center rounded-2xl bg-[var(--app-accent-soft)] text-[var(--app-accent)]">
+                <Gauge size={20} aria-hidden="true" />
+              </span>
               <div
-                className="grid size-16 place-items-center rounded-full"
+                className="grid size-20 place-items-center rounded-full p-1"
                 style={{
-                  background: `conic-gradient(var(--app-accent) ${Math.min(commitmentPercentage, 100)}%, var(--app-surface-muted) ${Math.min(commitmentPercentage, 100)}% 100%)`,
+                  background: `conic-gradient(var(--app-accent) ${monthProgress}%, var(--app-surface-muted) ${monthProgress}% 100%)`,
                 }}
-                aria-label={`${commitmentPercentage}% das entradas comprometidas`}
+                aria-label={`${monthProgress}% do mês concluído`}
               >
-                <span className="grid size-12 place-items-center rounded-full bg-white text-xs font-extrabold text-[var(--app-ink)]">
-                  {commitmentPercentage}%
+                <span className="grid size-full place-items-center rounded-full bg-[var(--app-surface)] text-xs font-extrabold">
+                  {monthProgress}%
                 </span>
               </div>
-            ) : null}
-          </div>
-
-          <div className="mt-8">
-            <p className="text-xs font-extrabold uppercase tracking-[0.08em] text-[var(--app-ink-faint)]">
-              Leitura do mês
-            </p>
-            <h2 className="mt-3 text-xl font-extrabold leading-tight tracking-[-0.03em] text-[var(--app-ink)]">
-              {insight.title}
-            </h2>
-            <p className="mt-3 text-sm leading-6 text-[var(--app-ink-muted)]">
-              {insight.message}
-            </p>
-          </div>
-        </article>
-
-        <article className="rounded-[1.75rem] bg-[var(--app-accent-soft)] p-5 sm:p-6">
-          <span className="flex size-10 items-center justify-center rounded-2xl bg-white/75 text-[var(--app-accent)] shadow-sm">
-            {dashboard.overdueFixedExpensesTotal > 0 ? (
-              <CircleAlert size={19} aria-hidden="true" />
-            ) : (
-              <ReceiptText size={19} aria-hidden="true" />
-            )}
-          </span>
-          <p className="mt-5 text-sm font-bold text-[var(--app-ink)]">
-            O que compõe esse valor
-          </p>
-          <div className="mt-3 divide-y divide-[var(--app-border)]">
-            <div className="flex items-center justify-between gap-3 py-3">
-              <span className="text-sm text-[var(--app-ink-muted)]">Contas fixas</span>
-              <strong className="text-sm font-extrabold text-[var(--app-ink)]">
-                {formatCurrency(dashboard.remainingFixedExpensesTotal)}
-              </strong>
             </div>
-            <div className="flex items-center justify-between gap-3 py-3">
-              <span className="text-sm text-[var(--app-ink-muted)]">Fatura vigente</span>
-              <strong className="text-sm font-extrabold text-[var(--app-ink)]">
-                {formatCurrency(dashboard.cardInvoicesTotal)}
+
+            <div className="relative mt-12">
+              <p className="section-eyebrow">Seu ritmo hoje</p>
+              <strong className="mt-3 block text-4xl font-extrabold tracking-[-0.06em] sm:text-5xl">
+                {safeDailyAmount === null
+                  ? "Sem meta"
+                  : formatCurrency(safeDailyAmount)}
               </strong>
+              <p className="mt-3 text-sm leading-6 text-[var(--app-ink-muted)]">
+                {dashboard.dailySpendingAllowance.message}
+              </p>
             </div>
-          </div>
-          <div className="mt-4 flex flex-wrap gap-3">
-            <Link
-              href="/ajustes"
-              className="inline-flex items-center gap-1 text-sm font-extrabold text-[var(--app-accent)]"
-            >
-              Contas fixas
-              <ArrowRight size={15} aria-hidden="true" />
-            </Link>
-            <Link
-              href="/cartoes"
-              className="inline-flex items-center gap-1 text-sm font-extrabold text-[var(--app-accent)]"
-            >
-              Cartões
-              <ArrowRight size={15} aria-hidden="true" />
-            </Link>
-          </div>
-        </article>
+          </article>
+
+          <article className="rounded-[1.55rem] bg-[var(--app-accent-soft)] p-5 sm:p-6">
+            <div className="flex items-start justify-between gap-4">
+              <span className="flex size-10 items-center justify-center rounded-2xl bg-white/72 text-[var(--app-accent)]">
+                {dashboard.overdueFixedExpensesTotal > 0 ? (
+                  <CircleAlert size={18} aria-hidden="true" />
+                ) : (
+                  <ReceiptText size={18} aria-hidden="true" />
+                )}
+              </span>
+              <span className="text-xs font-extrabold text-[var(--app-accent)]">
+                {dashboard.remainingDays} dias restantes
+              </span>
+            </div>
+            <p className="mt-5 text-sm font-extrabold">Próximos compromissos</p>
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              <div className="rounded-2xl bg-white/55 p-3">
+                <span className="text-[0.67rem] font-bold text-[var(--app-ink-muted)]">Contas fixas</span>
+                <strong className="mt-1 block text-sm font-extrabold">
+                  {formatCurrency(dashboard.remainingFixedExpensesTotal)}
+                </strong>
+              </div>
+              <div className="rounded-2xl bg-white/55 p-3">
+                <span className="text-[0.67rem] font-bold text-[var(--app-ink-muted)]">Fatura vigente</span>
+                <strong className="mt-1 block text-sm font-extrabold">
+                  {formatCurrency(dashboard.cardInvoicesTotal)}
+                </strong>
+              </div>
+            </div>
+            <div className="mt-4 flex gap-4">
+              <Link href="/ajustes" className="inline-flex items-center gap-1 text-sm font-extrabold text-[var(--app-accent)]">
+                Contas
+                <ArrowRight size={15} aria-hidden="true" />
+              </Link>
+              <Link href="/cartoes" className="inline-flex items-center gap-1 text-sm font-extrabold text-[var(--app-accent)]">
+                Cartões
+                <ArrowRight size={15} aria-hidden="true" />
+              </Link>
+            </div>
+          </article>
+        </aside>
       </div>
     </section>
   );

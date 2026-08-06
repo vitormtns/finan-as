@@ -84,9 +84,9 @@ export default async function Home() {
             <section aria-labelledby="acoes-rapidas">
               <div className="mb-4 flex items-end justify-between gap-4">
                 <div>
-                  <p className="section-eyebrow">Todos os dias</p>
+                  <p className="section-eyebrow">Continue seu mês</p>
                   <h2 id="acoes-rapidas" className="section-title mt-1">
-                    Ações rápidas
+                    O que você quer fazer?
                   </h2>
                 </div>
                 <Link
@@ -98,24 +98,24 @@ export default async function Home() {
                 </Link>
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[1.25fr_1.05fr_0.85fr_0.85fr]">
                 <Link
                   href="/novo?tipo=despesa"
-                  className="quick-action group"
+                  className="quick-action group min-h-28 bg-[var(--app-primary)] text-white hover:bg-[#1d2921]"
                 >
-                  <span className="quick-action-icon bg-[#fff0ed] text-[#a54535]">
+                  <span className="quick-action-icon bg-white/10 text-[#ffb5a7]">
                     <ArrowUpRight size={20} aria-hidden="true" />
                   </span>
                   <span>
-                    <strong>Registrar despesa</strong>
-                    <small>O que saiu agora</small>
+                    <strong className="!text-white">Registrar despesa</strong>
+                    <small className="!text-white/48">O que saiu agora</small>
                   </span>
-                  <ArrowRight className="ml-auto text-[var(--app-ink-faint)] transition group-hover:translate-x-1" size={18} aria-hidden="true" />
+                  <ArrowRight className="ml-auto text-white/40 transition group-hover:translate-x-1" size={18} aria-hidden="true" />
                 </Link>
 
                 <Link
                   href="/novo?tipo=receita"
-                  className="quick-action group"
+                  className="quick-action group min-h-28 bg-[var(--app-accent-soft)]"
                 >
                   <span className="quick-action-icon bg-[var(--app-accent-soft)] text-[var(--app-accent)]">
                     <ArrowDownLeft size={20} aria-hidden="true" />
@@ -127,7 +127,7 @@ export default async function Home() {
                   <ArrowRight className="ml-auto text-[var(--app-ink-faint)] transition group-hover:translate-x-1" size={18} aria-hidden="true" />
                 </Link>
 
-                <Link href="/gastos" className="quick-action group">
+                <Link href="/gastos" className="quick-action group min-h-28">
                   <span className="quick-action-icon bg-[var(--app-primary-soft)] text-[var(--app-primary)]">
                     <ListChecks size={20} aria-hidden="true" />
                   </span>
@@ -138,7 +138,7 @@ export default async function Home() {
                   <ArrowRight className="ml-auto text-[var(--app-ink-faint)] transition group-hover:translate-x-1" size={18} aria-hidden="true" />
                 </Link>
 
-                <Link href="/cartoes" className="quick-action group">
+                <Link href="/cartoes" className="quick-action group min-h-28">
                   <span className="quick-action-icon bg-[#e7e6ff] text-[#5148a8]">
                     <CreditCard size={20} aria-hidden="true" />
                   </span>
@@ -177,8 +177,8 @@ export default async function Home() {
                 </h2>
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-3">
-                <article className="metric-card">
+              <div className="grid gap-3 sm:grid-cols-[1.15fr_0.9fr_0.95fr]">
+                <article className="metric-card bg-[var(--app-accent-soft)]">
                   <span className="metric-card-icon bg-[var(--app-accent-soft)] text-[var(--app-accent)]">
                     <Landmark size={18} aria-hidden="true" />
                   </span>
@@ -196,7 +196,7 @@ export default async function Home() {
                   <small>Contas fixas mais a fatura vigente dos cartões.</small>
                 </article>
 
-                <article className="metric-card">
+                <article className={`metric-card ${dashboard.balanceAfterCommitments < 0 ? "bg-[var(--app-danger-soft)]" : "bg-[#fff2ce]"}`}>
                   <span className="metric-card-icon bg-[#fff3d6] text-[#87600b]">
                     <ArrowDownLeft size={18} aria-hidden="true" />
                   </span>
