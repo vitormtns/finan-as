@@ -52,19 +52,18 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data, error } = await supabase.auth.getClaims();
+  const isAuthenticated = !error && Boolean(data?.claims.sub);
   const { pathname } = request.nextUrl;
 
-  if (!user && isPrivateRoute(pathname)) {
+  if (!isAuthenticated && isPrivateRoute(pathname)) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("redirectTo", pathname);
     return NextResponse.redirect(url);
   }
 
-  if (user && pathname === "/login") {
+  if (isAuthenticated && pathname === "/login") {
     const url = request.nextUrl.clone();
     url.pathname = "/";
     url.search = "";

@@ -53,13 +53,17 @@ export async function requireCurrentUser() {
     redirect("/login");
   }
 
-  await syncProfileForUser(user);
-
   return user;
 }
 
 export async function requireCurrentUserId() {
-  const user = await requireCurrentUser();
+  const supabase = await createSupabaseServerClient();
+  const { data, error } = await supabase.auth.getClaims();
+  const userId = data?.claims.sub;
 
-  return user.id;
+  if (error || !userId) {
+    redirect("/login");
+  }
+
+  return userId;
 }

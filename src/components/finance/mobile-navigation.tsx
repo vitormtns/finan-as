@@ -9,7 +9,7 @@ import {
   Settings,
   Target,
 } from "lucide-react";
-import Link from "next/link";
+import Link, { useLinkStatus } from "next/link";
 import { usePathname } from "next/navigation";
 
 const primaryNavigationItems = [
@@ -52,6 +52,17 @@ function isCurrentRoute(pathname: string, href: string) {
   return href === "/" ? pathname === "/" : pathname.startsWith(href);
 }
 
+function NavigationPendingIndicator() {
+  const { pending } = useLinkStatus();
+
+  return (
+    <span
+      className={`navigation-pending-indicator ${pending ? "is-pending" : ""}`}
+      aria-hidden="true"
+    />
+  );
+}
+
 export function MobileNavigation() {
   const pathname = usePathname();
   const mobileItems = primaryNavigationItems.filter(
@@ -78,6 +89,7 @@ export function MobileNavigation() {
               Finanças vivas
             </span>
           </span>
+          <NavigationPendingIndicator />
         </Link>
 
         <div className="my-2 h-px bg-[var(--app-border)]" />
@@ -106,6 +118,7 @@ export function MobileNavigation() {
                       <Icon size={18} strokeWidth={2.2} aria-hidden="true" />
                     </span>
                     <span>{item.label}</span>
+                    <NavigationPendingIndicator />
                   </Link>
                 </li>
               );
@@ -126,6 +139,7 @@ export function MobileNavigation() {
           >
             <Plus size={17} strokeWidth={2.5} aria-hidden="true" />
             Registrar
+            <NavigationPendingIndicator />
           </Link>
         </div>
       </nav>
@@ -154,6 +168,7 @@ export function MobileNavigation() {
                     <Icon size={19} strokeWidth={2.2} aria-hidden="true" />
                   </span>
                   <span>{item.shortLabel}</span>
+                  <NavigationPendingIndicator />
                 </Link>
               </li>
             );
@@ -169,6 +184,7 @@ export function MobileNavigation() {
                 <Plus size={25} strokeWidth={2.5} aria-hidden="true" />
               </span>
               <span className="text-[0.62rem] font-extrabold tracking-[-0.01em]">Registrar</span>
+              <NavigationPendingIndicator />
             </Link>
           </li>
 
@@ -191,6 +207,7 @@ export function MobileNavigation() {
                     <Icon size={19} strokeWidth={2.2} aria-hidden="true" />
                   </span>
                   <span>{item.shortLabel}</span>
+                  <NavigationPendingIndicator />
                 </Link>
               </li>
             );
