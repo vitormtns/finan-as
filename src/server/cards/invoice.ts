@@ -131,16 +131,29 @@ export function getInvoiceCycleForReferenceDate(params: {
     params.referenceDate.getMonth(),
     params.referenceDate.getDate(),
   );
-  const currentMonthClosing = getClosingDate(
-    referenceDate.getFullYear(),
-    referenceDate.getMonth(),
-    params.closingDay,
-  );
-  const closingMonthOffset = referenceDate <= currentMonthClosing ? 0 : 1;
-
-  return getInvoiceCycleByClosingMonth({
+  const currentMonthCycle = getInvoiceCycleByClosingMonth({
     year: referenceDate.getFullYear(),
-    month: referenceDate.getMonth() + 1 + closingMonthOffset,
+    month: referenceDate.getMonth() + 1,
+    closingDay: params.closingDay,
+    dueDay: params.dueDay,
+  });
+  const previousMonthCycle = getInvoiceCycleByClosingMonth({
+    year: referenceDate.getFullYear(),
+    month: referenceDate.getMonth(),
+    closingDay: params.closingDay,
+    dueDay: params.dueDay,
+  });
+
+  if (referenceDate <= previousMonthCycle.dueDate) {
+    return previousMonthCycle;
+  }
+
+  if (referenceDate <= currentMonthCycle.dueDate) {
+    return currentMonthCycle;
+  }
+
+  return getNextInvoiceCycle({
+    cycle: currentMonthCycle,
     closingDay: params.closingDay,
     dueDay: params.dueDay,
   });

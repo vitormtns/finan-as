@@ -120,7 +120,7 @@ export function CardInvoiceWorkspace({
       <div className="grid gap-3 border-b border-black/[0.06] bg-black/[0.018] px-5 py-4 text-sm text-[var(--app-ink-muted)] sm:grid-cols-3 sm:px-6">
         <span className="inline-flex items-center gap-2">
           <CalendarDays size={16} aria-hidden="true" />
-          Fecha em {formatDate(invoice.closingDate)}
+          Fechamento em {formatDate(invoice.closingDate)}
         </span>
         <span className="inline-flex items-center gap-2">
           <ReceiptText size={16} aria-hidden="true" />

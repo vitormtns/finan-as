@@ -42,7 +42,7 @@ function roundMoney(value: number) {
 }
 
 function getInvoiceFetchStartDate(date = new Date()) {
-  return new Date(date.getFullYear(), date.getMonth() - 1, 1);
+  return new Date(date.getFullYear(), date.getMonth() - 2, 1);
 }
 
 function toInvoiceTransaction(

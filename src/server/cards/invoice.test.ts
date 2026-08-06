@@ -34,15 +34,56 @@ describe("ciclo de fatura do cartão", () => {
     assert.equal(toDateKey(cycle.periodStart), "2026-06-11");
   });
 
-  it("calcula fatura aberta após o fechamento do mês", () => {
+  it("mantém a fatura fechada como atual até o vencimento", () => {
     const cycle = getInvoiceCycleForReferenceDate({
       referenceDate: new Date(2026, 5, 19),
       closingDay: 10,
       dueDay: 20,
     });
 
+    assert.equal(toDateKey(cycle.closingDate), "2026-06-10");
+    assert.equal(toDateKey(cycle.dueDate), "2026-06-20");
+    assert.equal(toDateKey(cycle.periodStart), "2026-05-11");
+  });
+
+  it("avança a fatura atual depois do vencimento", () => {
+    const cycle = getInvoiceCycleForReferenceDate({
+      referenceDate: new Date(2026, 5, 21),
+      closingDay: 10,
+      dueDay: 20,
+    });
+
     assert.equal(toDateKey(cycle.closingDate), "2026-07-10");
+    assert.equal(toDateKey(cycle.dueDate), "2026-07-20");
     assert.equal(toDateKey(cycle.periodStart), "2026-06-11");
+  });
+
+  it("mantém como atual a fatura que fecha no mês anterior", () => {
+    const cycle = getInvoiceCycleForReferenceDate({
+      referenceDate: new Date(2026, 7, 3),
+      closingDay: 25,
+      dueDay: 5,
+    });
+
+    assert.equal(toDateKey(cycle.closingDate), "2026-07-25");
+    assert.equal(toDateKey(cycle.dueDate), "2026-08-05");
+    assert.equal(toDateKey(cycle.periodStart), "2026-06-26");
+  });
+
+  it("aplica fechamento inclusivo e vencimento no exemplo de agosto", () => {
+    const purchaseBeforeClosing = getInvoiceCycleForTransaction({
+      transactionDate: new Date(2026, 7, 10),
+      closingDay: 12,
+      dueDay: 20,
+    });
+    const purchaseAfterClosing = getInvoiceCycleForTransaction({
+      transactionDate: new Date(2026, 7, 14),
+      closingDay: 12,
+      dueDay: 20,
+    });
+
+    assert.equal(toDateKey(purchaseBeforeClosing.dueDate), "2026-08-20");
+    assert.equal(toDateKey(purchaseAfterClosing.dueDate), "2026-09-20");
   });
 
   it("ajusta fechamento e vencimento em meses curtos", () => {

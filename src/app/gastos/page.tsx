@@ -170,7 +170,7 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
                     </div>
                     <p className="mt-3 text-xs text-[var(--app-ink-muted)]">
                       {transaction.paymentMethod === "CREDIT"
-                        ? "Fechamento em "
+                        ? "Vencimento em "
                         : ""}
                       {new Intl.DateTimeFormat("pt-BR").format(
                         new Date(`${transaction.date}T00:00:00`),

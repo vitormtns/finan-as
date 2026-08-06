@@ -24,7 +24,7 @@ export function getTransactionAccountingDate(
     transactionDate: transaction.date,
     closingDay: transaction.card.closingDay ?? 1,
     dueDay: transaction.card.dueDay ?? 10,
-  }).closingDate;
+  }).dueDate;
 }
 
 export function isTransactionInAccountingPeriod(
