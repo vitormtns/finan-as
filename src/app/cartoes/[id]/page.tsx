@@ -91,10 +91,10 @@ export default async function CardDetailPage({ params }: CardDetailPageProps) {
 
   return (
     <div className="app-shell">
-      <main className="flex w-full max-w-none flex-col gap-6 px-0 py-5 sm:px-5 md:py-8 lg:px-6 xl:px-8">
+      <main className="flex w-full max-w-none flex-col gap-6 px-3 py-5 sm:px-5 md:py-8 lg:px-6 xl:px-8">
         <Link
           href="/cartoes"
-          className="mx-4 inline-flex w-fit items-center gap-2 rounded-full bg-white/70 px-3 py-2 text-sm font-bold text-[var(--app-primary)] shadow-sm transition hover:bg-white sm:mx-0"
+          className="inline-flex w-fit items-center gap-2 rounded-full bg-white/70 px-3 py-2 text-sm font-bold text-[var(--app-primary)] shadow-sm transition hover:bg-white"
         >
           <ArrowLeft size={17} aria-hidden="true" />
           Todos os cartões

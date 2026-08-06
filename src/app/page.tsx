@@ -51,8 +51,8 @@ export default async function Home() {
 
   return (
     <div className="app-shell">
-      <main className="flex w-full max-w-none flex-col gap-8 px-0 py-5 sm:px-5 md:py-8 lg:px-6 xl:px-8">
-        <header className="flex items-center justify-between px-4 sm:px-0 md:hidden">
+      <main className="flex w-full max-w-none flex-col gap-8 px-3 py-5 sm:px-5 md:py-8 lg:px-6 xl:px-8">
+        <header className="flex items-center justify-between md:hidden">
           <div>
             <p className="text-xs font-extrabold uppercase tracking-[0.1em] text-[var(--app-ink-faint)]">
               Meu Mês
@@ -82,7 +82,7 @@ export default async function Home() {
             />
 
             <section aria-labelledby="acoes-rapidas">
-              <div className="mb-4 flex items-end justify-between gap-4 px-4 sm:px-0">
+              <div className="mb-4 flex items-end justify-between gap-4">
                 <div>
                   <p className="section-eyebrow">Continue seu mês</p>
                   <h2 id="acoes-rapidas" className="section-title mt-1">
@@ -170,7 +170,7 @@ export default async function Home() {
             ) : null}
 
             <section aria-labelledby="pulso-do-mes">
-              <div className="mb-4 px-4 sm:px-0">
+              <div className="mb-4">
                 <p className="section-eyebrow">Entradas, saídas e compromissos</p>
                 <h2 id="pulso-do-mes" className="section-title mt-1">
                   Pulso do mês
@@ -220,7 +220,7 @@ export default async function Home() {
             </section>
 
             <section aria-labelledby="detalhes-do-mes">
-              <div className="mb-4 flex items-end justify-between gap-4 px-4 sm:px-0">
+              <div className="mb-4 flex items-end justify-between gap-4">
                 <div>
                   <p className="section-eyebrow">Quando quiser aprofundar</p>
                   <h2 id="detalhes-do-mes" className="section-title mt-1">

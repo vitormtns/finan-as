@@ -88,7 +88,7 @@ export function HeroDashboard({
   const safeDailyAmount = dashboard.dailySpendingAllowance.safeDailyAmount;
 
   return (
-    <section className="relative overflow-hidden rounded-none bg-[var(--app-primary)] text-white shadow-[0_36px_110px_rgb(17_25_20_/_0.26)] sm:rounded-[2.4rem]">
+    <section className="relative -mx-3 overflow-hidden rounded-none bg-[var(--app-primary)] text-white shadow-[0_36px_110px_rgb(17_25_20_/_0.26)] sm:mx-0 sm:rounded-[2.4rem]">
       <div className="ambient-orb pointer-events-none absolute -right-28 -top-40 size-[32rem] rounded-full bg-[#2d9e68]/35 blur-[90px]" />
       <div className="pointer-events-none absolute -bottom-48 -left-32 size-[30rem] rounded-full bg-[#d8f3e4]/10 blur-[100px]" />
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(120deg,transparent_35%,rgb(255_255_255_/_0.035),transparent_68%)]" />
