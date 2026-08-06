@@ -32,7 +32,7 @@ export default async function AlertsPage() {
   const { alerts, error } = await loadAlerts();
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,#dbeafe_0,#f8fafc_34rem)] pb-28 md:pb-0">
+    <div className="app-shell min-h-screen bg-[radial-gradient(circle_at_top_left,#dbeafe_0,#f8fafc_34rem)] pb-28 lg:pb-0">
       <main className="flex w-full max-w-none flex-col gap-5 px-3 py-5 sm:px-5 md:py-8 lg:px-6 xl:px-8">
         <header>
           <div className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-white/80 px-3 py-1 text-sm font-medium text-blue-700 shadow-sm shadow-blue-100/70">
